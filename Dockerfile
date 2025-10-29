@@ -1,36 +1,22 @@
-FROM node:24.7 AS frontend
+# Use Gradle with JDK 21
+FROM gradle:8.12.1-jdk21 AS builder
 
-WORKDIR /frontend
+WORKDIR /build
 
-COPY frontend/package*.json .
+# Copy everything except what's in .dockerignore
+COPY . .
 
-RUN npm ci
+# Build the application
+RUN ./gradlew clean build
 
-COPY frontend /frontend
+# Runtime stage
+FROM eclipse-temurin:21-jre
 
-RUN npm run build
+WORKDIR /app
 
-FROM eclipse-temurin:21-jdk
+# Copy the built jar from builder stage
+COPY --from=builder /build/build/libs/*.jar app.jar
 
-RUN apt-get update && apt-get install -yq make unzip
-
-WORKDIR /backend
-
-COPY gradle gradle
-COPY build.gradle.kts .
-COPY settings.gradle.kts .
-COPY gradlew .
-
-RUN ./gradlew --no-daemon dependencies
-
-COPY lombok.config .
-COPY src src
-
-COPY --from=frontend /frontend/dist /backend/src/main/resources/static
-
-RUN ./gradlew --no-daemon build
-
-ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=60.0 -XX:InitialRAMPercentage=50.0"
 EXPOSE 8080
 
-CMD java -jar build/libs/HexletSpringBlog-1.0-SNAPSHOT.jar
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
