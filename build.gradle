@@ -1,0 +1,140 @@
+plugins {
+	id 'java'
+	id 'jacoco'
+	id 'org.sonarqube' version "6.3.1.5724"
+	id 'org.springframework.boot' version '3.5.8-SNAPSHOT'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'hexlet.code'
+version = '0.0.1-SNAPSHOT'
+description = 'Task manager'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+	maven { url = 'https://repo.spring.io/snapshot' }
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'org.postgresql:postgresql'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+tasks.jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.required.set(true)
+		html.required.set(true)
+		csv.required.set(false)
+	}
+
+	executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					'**/model/**',
+					'**/config/**',
+					'**/Application.class',
+					'**/entity/**',
+					'**/dto/**'
+			])
+		}))
+	}
+}
+
+tasks.jacocoTestCoverageVerification {
+	dependsOn jacocoTestReport
+	violationRules {
+		rule {
+			limit {
+				minimum = "0.7".toBigDecimal()
+			}
+		}
+		rule {
+			enabled = true
+			element = 'CLASS'
+			excludes = [
+					'*.model.*',
+					'*.config.*',
+					'*.Application',
+					'*.entity.*',
+					'*.dto.*'
+			]
+		}
+	}
+}
+
+sonarqube {
+	properties {
+		property "sonar.projectKey", "Levasey_java-project-99"
+		property "sonar.organization", "levasey"
+		property "sonar.projectName", "Java project 99"
+		property "sonar.host.url", "https://sonarcloud.io"
+
+		// Java configuration
+		property "sonar.sourceEncoding", "UTF-8"
+		property "sonar.java.source", "21"
+		property "sonar.java.binaries", "build/classes/java/main"
+		property "sonar.java.test.binaries", "build/classes/java/test"
+		property "sonar.java.libraries", "build/libs/*.jar"
+
+		// Coverage configuration
+		property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
+		property "sonar.coverage.exclusions", "**/model/**,**/config/**,**/entity/**,**/dto/**,**/Application.java"
+
+		// Test configuration
+		property "sonar.junit.reportPaths", "build/test-results/test"
+		property "sonar.tests", "src/test/java"
+		property "sonar.test.exclusions", "**/model/**,**/config/**,**/entity/**,**/dto/**"
+
+		// Source configuration
+		property "sonar.sources", "src/main/java"
+		property "sonar.tests", "src/test/java"
+
+		// Quality Gate
+		property "sonar.qualitygate.wait", "true"
+
+		// JaCoCo configuration
+		property "sonar.jacoco.reportPaths", "build/jacoco/test.exec"
+	}
+}
+
+tasks.check {
+	dependsOn tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification
+}
+
+tasks.clean {
+	doLast {
+		delete("build")
+	}
+}
+
+// Ensure SonarQube analysis runs after tests and coverage reports
+tasks.named('sonar') {
+	dependsOn test, jacocoTestReport
+}
