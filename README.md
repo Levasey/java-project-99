@@ -1,5 +1,6 @@
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/Levasey/java-project-99/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/Levasey/java-project-99/actions)
+[![CI](https://github.com/Levasey/java-project-99/actions/workflows/build.yml/badge.svg)](https://github.com/Levasey/java-project-99/actions/workflows/build.yml)
 
 ## Requirements
 
@@ -13,4 +14,4 @@ make install
 make start
 ```
 
-Open in browser: https://java-project-99-6eb7.onrender.com
+Open in browser: https://java-project-99-1-9ucf.onrender.com
