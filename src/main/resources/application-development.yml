@@ -1,0 +1,10 @@
+spring:
+  profiles: development
+  datasource:
+    url: jdbc:h2:file:./data/devdb;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+jpa:
+  hibernate:
+  ddl-auto: update

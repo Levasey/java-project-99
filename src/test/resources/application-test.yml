@@ -1,0 +1,33 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=LEGACY;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: ""
+  h2:
+    console:
+      enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          public-key-location: ""  # Отключаем JWT
+    enabled: false  # Отключаем Spring Security
+
+logging:
+  level:
+    org.springframework: WARN
+    org.hibernate: WARN
+    io.hexletspringblog: DEBUG
+    org.springframework.security: DEBUG  # Для отладки
