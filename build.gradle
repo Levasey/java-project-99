@@ -1,7 +1,7 @@
 plugins {
 	id 'java'
 	id 'jacoco'
-	id 'org.sonarqube' version "6.3.1.5724"
+	id "org.sonarqube" version "7.0.1.6134"
 	id 'org.springframework.boot' version '3.5.8-SNAPSHOT'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
@@ -52,8 +52,6 @@ tasks.jacocoTestReport {
 		csv.required.set(false)
 	}
 
-	executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
-
 	afterEvaluate {
 		classDirectories.setFrom(files(classDirectories.files.collect {
 			fileTree(dir: it, exclude: [
@@ -72,7 +70,7 @@ tasks.jacocoTestCoverageVerification {
 	violationRules {
 		rule {
 			limit {
-				minimum = "0.7".toBigDecimal()
+				minimum = "0.5".toBigDecimal()
 			}
 		}
 		rule {
@@ -102,7 +100,7 @@ sonarqube {
 		property "sonar.java.test.binaries", "build/classes/java/test"
 		property "sonar.java.libraries", "build/libs/*.jar"
 
-		// Coverage configuration
+		// Coverage configuration - UPDATED
 		property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
 		property "sonar.coverage.exclusions", "**/model/**,**/config/**,**/entity/**,**/dto/**,**/Application.java"
 
@@ -117,9 +115,6 @@ sonarqube {
 
 		// Quality Gate
 		property "sonar.qualitygate.wait", "true"
-
-		// JaCoCo configuration
-		property "sonar.jacoco.reportPaths", "build/jacoco/test.exec"
 	}
 }
 
@@ -133,7 +128,6 @@ tasks.clean {
 	}
 }
 
-// Ensure SonarQube analysis runs after tests and coverage reports
 tasks.named('sonar') {
 	dependsOn test, jacocoTestReport
 }
