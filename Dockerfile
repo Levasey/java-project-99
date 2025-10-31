@@ -1,9 +1,15 @@
-FROM gradle:8.14.3-jdk-21-and-24
+FROM gradle:8.14.3-jdk-21
 
 WORKDIR /app
 
-COPY /app .
+# Копируем исходный код
+COPY . .
 
-RUN gradle installDist
+# Даем права на выполнение gradlew (если есть)
+RUN chmod +x ./gradlew
 
-CMD ./build/install/app/bin/app
+# Собираем приложение
+RUN ./gradlew installDist
+
+# Запускаем приложение
+CMD ["./build/install/app/bin/app"]
