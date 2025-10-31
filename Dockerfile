@@ -1,22 +1,9 @@
-# Use Gradle with JDK 21
-FROM gradle:8.12.1-jdk21 AS builder
-
-WORKDIR /build
-
-# Copy everything except what's in .dockerignore
-COPY . .
-
-# Build the application
-RUN ./gradlew clean build
-
-# Runtime stage
-FROM eclipse-temurin:21-jre
+FROM gradle:8.14.3-jdk-21-and-24
 
 WORKDIR /app
 
-# Copy the built jar from builder stage
-COPY --from=builder /build/build/libs/*.jar app.jar
+COPY /app .
 
-EXPOSE 8080
+RUN gradle installDist
 
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+CMD ./build/install/app/bin/app
