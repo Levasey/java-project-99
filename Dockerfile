@@ -1,15 +1,21 @@
-FROM gradle:8.7.0-jdk21
+FROM gradle:8.7.0-jdk21 AS builder
 
 WORKDIR /app
 
-# Копируем исходный код
 COPY . .
 
-# Даем права на выполнение gradlew (если есть)
 RUN chmod +x ./gradlew
 
-# Собираем приложение
-RUN ./gradlew installDist
+# Собираем JAR файл вместо installDist
+RUN ./gradlew clean build
+
+# Второй этап для минимального образа
+FROM openjdk:21-jre-slim
+
+WORKDIR /app
+
+# Копируем собранный JAR из первого этапа
+COPY --from=builder /app/build/libs/*.jar app.jar
 
 # Запускаем приложение
-CMD ["./build/install/app/bin/app"]
+CMD ["java", "-jar", "app.jar"]
