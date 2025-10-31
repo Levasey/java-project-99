@@ -40,7 +40,7 @@ jobs:
       - name: Run tests with coverage
         run: ./gradlew test jacocoTestReport --info
 
-      - name: Build and analyze with debug
+      - name: SonarQube analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew build sonar --debug --stacktrace
+        run: ./gradlew sonar --info
