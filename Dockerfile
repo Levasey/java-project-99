@@ -6,11 +6,11 @@ COPY . .
 
 RUN chmod +x ./gradlew
 
-# Собираем JAR файл вместо installDist
+# Собираем JAR файл
 RUN ./gradlew clean build
 
 # Второй этап для минимального образа
-FROM openjdk:21-jre-slim
+FROM openjdk:21-slim
 
 WORKDIR /app
 
