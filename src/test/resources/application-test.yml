@@ -30,4 +30,3 @@ logging:
     org.springframework: WARN
     org.hibernate: WARN
     io.hexletspringblog: DEBUG
-    org.springframework.security: DEBUG  # Для отладки

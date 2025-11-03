@@ -16,5 +16,6 @@ public class UserUpdateDTO {
     @Email(message = "Email should be valid")
     private JsonNullable<String> email;
 
+    @Size(min = 3, message = "Password must be at least 3 characters long")
     private JsonNullable<String> password;
 }

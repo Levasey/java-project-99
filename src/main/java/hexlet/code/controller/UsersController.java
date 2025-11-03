@@ -65,10 +65,6 @@ public class UsersController {
             throw new ResourceAlreadyExistsException("User with this email already exists");
         }
 
-        if (userUpdateDTO.getPassword() != null && userUpdateDTO.getPassword().isPresent()) {
-            user.setPasswordDigest(passwordEncoder.encode(userUpdateDTO.getPassword().get()));
-        }
-
         userMapper.update(userUpdateDTO, user);
         userRepository.save(user);
 
