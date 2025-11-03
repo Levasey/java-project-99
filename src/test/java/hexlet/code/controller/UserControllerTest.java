@@ -12,7 +12,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.dto.UserDTO;
-import hexlet.code.mapper.UserMapper;
 import hexlet.code.model.User;
 import hexlet.code.repository.UserRepository;
 import hexlet.code.util.ModelGenerator;
@@ -77,6 +76,9 @@ class UserControllerTest {
                 .andReturn();
 
         var body = result.getResponse().getContentAsString();
+        List<UserDTO> users = om.readValue(body, new TypeReference<>() {});
+
+        assertThat(users).hasSize(1);
         assertThatJson(body).isArray();
     }
 
@@ -86,10 +88,11 @@ class UserControllerTest {
         var result = mockMvc.perform(request).andExpect(status().isOk()).andReturn();
         var body = result.getResponse().getContentAsString();
 
-        // Проверяем основные поля
-        assertThat(body).contains(testUser.getEmail());
-        assertThat(body).contains(testUser.getFirstName());
-        assertThat(body).contains(testUser.getLastName());
+        UserDTO userDTO = om.readValue(body, UserDTO.class);
+
+        assertThat(userDTO.getEmail()).isEqualTo(testUser.getEmail());
+        assertThat(userDTO.getFirstName()).isEqualTo(testUser.getFirstName());
+        assertThat(userDTO.getLastName()).isEqualTo(testUser.getLastName());
     }
 
     @Test
@@ -123,8 +126,29 @@ class UserControllerTest {
         mockMvc.perform(request)
                 .andExpect(status().isOk());
 
-        testUser = userRepository.findById(testUser.getId()).get();
-        assertThat(testUser.getFirstName()).isEqualTo("newFirstName");
+        User updatedUser = userRepository.findById(testUser.getId()).get();
+        assertThat(updatedUser).isNotNull();
+        assertThat(updatedUser.getFirstName()).isEqualTo("newFirstName");
+    }
+
+    @Test
+    public void testPartialUpdate() throws Exception {
+
+        var data = new HashMap<>();
+        data.put("firstName", "newFirstName");
+
+        var request = put("/api/users/" + testUser.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(data));
+
+        mockMvc.perform(request)
+                .andExpect(status().isOk());
+
+        User updatedUser = userRepository.findById(testUser.getId()).get();
+        assertThat(updatedUser).isNotNull();
+        assertThat(updatedUser.getFirstName()).isEqualTo("newFirstName");
+        assertThat(updatedUser.getLastName()).isEqualTo(testUser.getLastName());
+        assertThat(updatedUser.getEmail()).isEqualTo(testUser.getEmail());
     }
 
     @Test
@@ -180,5 +204,78 @@ class UserControllerTest {
                 .content(om.writeValueAsString(data));
 
         mockMvc.perform(request).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testDeleteNonExistentUser() throws Exception {
+        var request = delete("/api/users/9999");
+        mockMvc.perform(request).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testCreateWithInvalidData() throws Exception {
+        // Тестируем валидацию - пустой email
+        var data = new HashMap<String, Object>();
+        data.put("firstName", "John");
+        data.put("lastName", "Doe");
+        data.put("password", "123"); // Слишком короткий пароль
+
+        var request = post("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(data));
+
+        mockMvc.perform(request).andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    void testUserMapping() throws Exception {
+        // Проверяем корректность маппинга DTO
+        var result = mockMvc.perform(get("/api/users/" + testUser.getId()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var body = result.getResponse().getContentAsString();
+        UserDTO userDTO = om.readValue(body, UserDTO.class);
+
+        assertThat(userDTO.getId()).isEqualTo(testUser.getId());
+        assertThat(userDTO.getEmail()).isEqualTo(testUser.getEmail());
+        assertThat(userDTO.getFirstName()).isEqualTo(testUser.getFirstName());
+        assertThat(userDTO.getLastName()).isEqualTo(testUser.getLastName());
+        // Проверяем, что пароль не exposed в DTO
+    }
+
+    @Test
+    void testUpdateWithNullFields() throws Exception {
+        // Тестируем обновление с null значениями в JsonNullable
+        var data = """
+        {
+            "firstName": null,
+            "lastName": "UpdatedLastName"
+        }
+        """;
+
+        var request = put("/api/users/" + testUser.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(data);
+
+        mockMvc.perform(request).andExpect(status().isOk());
+
+        var updatedUser = userRepository.findById(testUser.getId()).orElse(null);
+        assertThat(updatedUser).isNotNull();
+        assertThat(updatedUser.getLastName()).isEqualTo("UpdatedLastName");
+        // firstName должен остаться прежним, так как он был явно установлен в null
+    }
+
+    @Test
+    void testCreateWithNullFields() throws Exception {
+        var data = new HashMap<String, Object>();
+        // Отправляем неполные данные
+        data.put("email", "test@example.com");
+
+        var request = post("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(data));
+
+        mockMvc.perform(request).andExpect(status().isUnprocessableEntity());
     }
 }

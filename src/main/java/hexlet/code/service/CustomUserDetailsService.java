@@ -51,16 +51,11 @@ public class CustomUserDetailsService implements UserDetailsManager {
 
     @Override
     public void changePassword(String oldPassword, String newPassword) {
-        // Реализация смены пароля
+
     }
 
     @Override
     public boolean userExists(String username) {
         return userRepository.existsByEmail(username);
-    }
-
-    public User createUser(User user) {
-        user.setPasswordDigest(passwordEncoder.encode(user.getPasswordDigest()));
-        return userRepository.save(user);
     }
 }
