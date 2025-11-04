@@ -8,6 +8,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.logging.Logger;
+
 @Component
 @RequiredArgsConstructor
 public class DataInitializer implements ApplicationRunner {
@@ -20,8 +22,9 @@ public class DataInitializer implements ApplicationRunner {
         String adminEmail = System.getenv("ADMIN_EMAIL");
         String adminPassword = System.getenv("ADMIN_PASSWORD");
 
+        Logger logger = Logger.getLogger(getClass().getName());
         if (adminEmail == null || adminPassword == null) {
-            System.out.println("Admin credentials not set in environment variables");
+            logger.info("Admin credentials not set in environment variables");
             return;
         }
 
@@ -33,7 +36,7 @@ public class DataInitializer implements ApplicationRunner {
             admin.setFirstName("Admin");
             admin.setLastName("Hexlet");
             userRepository.save(admin);
-            System.out.println("Admin user created with email: " + adminEmail);
+            logger.info("Admin user created with email: " + adminEmail);
         }
     }
 }

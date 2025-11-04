@@ -10,6 +10,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -19,7 +20,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
     private final JwtDecoder jwtDecoder;
     private final PasswordEncoder passwordEncoder;
     private final CustomUserDetailsService userService;
@@ -27,14 +27,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         // Публичные эндпоинты
-                        .requestMatchers("/", "/about", "/welcome", "/api/login", "/api/users/register").permitAll()
-                        .requestMatchers("/api/posts", "/api/posts/{id}", "/api/tags", "/api/tags/{id}").permitAll()
-
+                        .requestMatchers("/welcome", "/api/login", "/api/users/register").permitAll()
                         // Защищенные эндпоинты - требуют аутентификации
-                        .requestMatchers("/api/posts/**", "/api/users/**", "/api/tags/**").authenticated()
+                        .requestMatchers("/api/users/**").authenticated()
 
                         .anyRequest().authenticated()
                 )

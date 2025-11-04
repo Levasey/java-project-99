@@ -51,7 +51,7 @@ public class CustomUserDetailsService implements UserDetailsManager {
 
     @Override
     public void changePassword(String oldPassword, String newPassword) {
-
+//Метод для изменения пароля
     }
 
     @Override
