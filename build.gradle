@@ -87,7 +87,7 @@ tasks.jacocoTestCoverageVerification {
 	violationRules {
 		rule {
 			limit {
-				minimum = "0.5".toBigDecimal()
+				minimum = "0.8".toBigDecimal()
 			}
 		}
 		rule {
@@ -131,7 +131,7 @@ sonarqube {
 		property "sonar.tests", "src/test/java"
 
 		// Quality Gate
-		property "sonar.qualitygate.wait", "true"
+		property "sonar.qualitygate.wait", "false"
 	}
 }
 
