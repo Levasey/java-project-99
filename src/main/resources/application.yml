@@ -9,11 +9,6 @@ spring:
       hibernate:
         format_sql: true
 
-app:
-  admin:
-    email: ${ADMIN_EMAIL:hexlet@example.com}
-    password: ${ADMIN_PASSWORD:qwerty}
-
 rsa:
   private-key: classpath:certs/private.pem
   public-key: classpath:certs/public.pem

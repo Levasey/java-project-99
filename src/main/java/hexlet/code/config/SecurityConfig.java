@@ -29,10 +29,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Sensitive: csrf protection is entirely disabled
                 .authorizeHttpRequests(auth -> auth
                         // Публичные эндпоинты
-                        .requestMatchers("/welcome", "/api/login", "/api/users/register").permitAll()
+                        .requestMatchers("/").permitAll()
+                        .requestMatchers("/index.html").permitAll()
+                        .requestMatchers("/assets/**").permitAll()
+                        .requestMatchers("/favicon.ico").permitAll()
+                        .requestMatchers("/api/login").permitAll()
+                        .requestMatchers("/h2-console/**").permitAll()
                         // Защищенные эндпоинты - требуют аутентификации
-                        .requestMatchers("/api/users/**").authenticated()
-
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

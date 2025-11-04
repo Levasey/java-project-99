@@ -21,7 +21,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
-public class User implements UserDetails {
+public class User implements UserDetails, BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,6 +36,7 @@ public class User implements UserDetails {
     private String email;
 
     @NotBlank
+    @Column(name = "password")
     @Size(min = 3, message = "Password must be minimum 3 characters")
     private String passwordDigest;
 

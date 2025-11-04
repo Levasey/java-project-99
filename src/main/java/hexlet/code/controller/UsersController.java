@@ -31,9 +31,6 @@ public class UsersController {
     @Autowired
     private CustomUserDetailsService userService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<UserDTO> getAllUsers() {
@@ -46,7 +43,6 @@ public class UsersController {
             throw new ResourceAlreadyExistsException("User with this email already exists");
         }
         User user = userMapper.map(userCreateDTO);
-        user.setPasswordDigest(passwordEncoder.encode(userCreateDTO.getPassword()));
         User saved = userRepository.save(user);
         UserDTO userDTO = userMapper.map(saved);
         return ResponseEntity.status(HttpStatus.CREATED).body(userDTO);
