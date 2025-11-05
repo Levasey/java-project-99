@@ -1,5 +1,6 @@
 package hexlet.code.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -13,6 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,6 +28,10 @@ public class User implements UserDetails, BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "author", cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<TaskStatus> taskStatuses = new ArrayList<>();
+
     private String firstName;
 
     private String lastName;
@@ -37,7 +43,7 @@ public class User implements UserDetails, BaseEntity {
 
     @NotBlank
     @Column(name = "password")
-    @Size(min = 3, message = "Password must be minimum 3 characters")
+    @Size(min = 3, message = "Password must be at least 3 characters")
     private String passwordDigest;
 
     @CreatedDate

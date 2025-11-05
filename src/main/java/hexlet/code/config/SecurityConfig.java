@@ -4,6 +4,7 @@ import hexlet.code.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -30,12 +31,17 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Публичные эндпоинты
                         .requestMatchers("/").permitAll()
+                        .requestMatchers("/welcome").permitAll()
                         .requestMatchers("/index.html").permitAll()
                         .requestMatchers("/assets/**").permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/api/login").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/task_statuses", "/api/task_statuses/*").permitAll()
                         // Защищенные эндпоинты - требуют аутентификации
+                        .requestMatchers(HttpMethod.POST, "/api/task_statuses").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/task_statuses/*").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/task_statuses/*").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
