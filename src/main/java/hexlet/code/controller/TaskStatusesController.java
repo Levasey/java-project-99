@@ -1,9 +1,8 @@
 package hexlet.code.controller;
 
-import hexlet.code.dto.TaskStatusCreateDTO;
-import hexlet.code.dto.TaskStatusDTO;
-import hexlet.code.dto.TaskStatusUpdateDTO;
-import hexlet.code.model.User;
+import hexlet.code.dto.taskStatus.TaskStatusCreateDTO;
+import hexlet.code.dto.taskStatus.TaskStatusDTO;
+import hexlet.code.dto.taskStatus.TaskStatusUpdateDTO;
 import hexlet.code.service.TaskStatusService;
 import hexlet.code.utils.UserUtils;
 import jakarta.validation.Valid;
@@ -24,8 +23,8 @@ public class TaskStatusesController {
     private UserUtils userUtils;
 
     @GetMapping
-    public List<TaskStatusDTO> index() {
-        return taskStatusService.findAll();
+    public ResponseEntity<List<TaskStatusDTO>> index() {
+        return ResponseEntity.ok(taskStatusService.findAll());
     }
 
     @GetMapping("/{id}")
@@ -36,13 +35,13 @@ public class TaskStatusesController {
 
     @PostMapping
     public ResponseEntity<TaskStatusDTO> create(@Valid @RequestBody TaskStatusCreateDTO taskStatusCreateDTO) {
-        User currentUser = userUtils.getCurrentUser();
-        TaskStatusDTO created = taskStatusService.create(taskStatusCreateDTO, currentUser);
+        TaskStatusDTO created = taskStatusService.create(taskStatusCreateDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TaskStatusDTO> update(@PathVariable Long id, @Valid @RequestBody TaskStatusUpdateDTO taskStatusUpdateDTO) {
+    public ResponseEntity<TaskStatusDTO> update(@PathVariable Long id,
+                                                @Valid @RequestBody TaskStatusUpdateDTO taskStatusUpdateDTO) {
         TaskStatusDTO updated = taskStatusService.update(id, taskStatusUpdateDTO);
         return ResponseEntity.ok(updated);
     }

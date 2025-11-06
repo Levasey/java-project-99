@@ -29,8 +29,9 @@ public class User implements UserDetails, BaseEntity {
     private Long id;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "author", cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<TaskStatus> taskStatuses = new ArrayList<>();
+    @OneToMany(mappedBy = "assignee", cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
+            orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Task> tasks = new ArrayList<>();
 
     private String firstName;
 

@@ -1,14 +1,12 @@
 package hexlet.code.service;
 
-import hexlet.code.dto.TaskStatusCreateDTO;
-import hexlet.code.dto.TaskStatusDTO;
-import hexlet.code.dto.TaskStatusUpdateDTO;
+import hexlet.code.dto.taskStatus.TaskStatusCreateDTO;
+import hexlet.code.dto.taskStatus.TaskStatusDTO;
+import hexlet.code.dto.taskStatus.TaskStatusUpdateDTO;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.TaskStatusMapper;
 import hexlet.code.model.TaskStatus;
-import hexlet.code.model.User;
 import hexlet.code.repository.TaskStatusRepository;
-import hexlet.code.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional
 public class TaskStatusService {
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private TaskStatusRepository taskStatusRepository;
@@ -44,10 +40,8 @@ public class TaskStatusService {
         return taskStatusMapper.map(taskStatus);
     }
 
-    public TaskStatusDTO create(TaskStatusCreateDTO taskStatusCreateDTO, User currentUser) {
+    public TaskStatusDTO create(TaskStatusCreateDTO taskStatusCreateDTO) {
         TaskStatus taskStatus = taskStatusMapper.map(taskStatusCreateDTO);
-        taskStatus.setAuthor(currentUser);
-
         TaskStatus saved = taskStatusRepository.save(taskStatus);
         return taskStatusMapper.map(saved);
     }

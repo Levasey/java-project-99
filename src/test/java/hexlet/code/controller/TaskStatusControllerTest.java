@@ -11,11 +11,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import hexlet.code.dto.TaskStatusDTO;
+import hexlet.code.dto.taskStatus.TaskStatusDTO;
 import hexlet.code.model.TaskStatus;
-import hexlet.code.model.User;
 import hexlet.code.repository.TaskStatusRepository;
-import hexlet.code.repository.UserRepository;
 import hexlet.code.util.ModelGenerator;
 
 import java.nio.charset.StandardCharsets;
@@ -49,9 +47,6 @@ public class TaskStatusControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private TaskStatusRepository taskStatusRepository;
 
     @Autowired
@@ -59,12 +54,9 @@ public class TaskStatusControllerTest {
 
     private TaskStatus testTaskStatus;
 
-    private User testUser;
-
     @BeforeEach
     void setUp() {
         taskStatusRepository.deleteAll();
-        userRepository.deleteAll();
 
         mockMvc = MockMvcBuilders.webAppContextSetup(wac)
                 .defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
@@ -72,11 +64,7 @@ public class TaskStatusControllerTest {
 
         objectMapper.registerModule(new JsonNullableModule());
 
-        testUser = Instancio.of(modelGenerator.getUserModel()).create();
-        userRepository.save(testUser);
-
         testTaskStatus = Instancio.of(modelGenerator.getTaskStatusModel()).create();
-        testTaskStatus.setAuthor(testUser);
         taskStatusRepository.save(testTaskStatus);
 
     }
@@ -89,10 +77,10 @@ public class TaskStatusControllerTest {
 
         var body = result.getResponse().getContentAsString();
 
-        List<TaskStatusDTO> taskStatusDTOS = objectMapper.readValue(body, new TypeReference<>() {
-        });
+        List<TaskStatusDTO> taskStatusDTOS = objectMapper.readValue(body, new TypeReference<>() {});
 
         assertThat(taskStatusDTOS).hasSize(1);
+        assertThatJson(body).isNotNull();
         assertThatJson(body).isArray();
     }
 
@@ -106,8 +94,7 @@ public class TaskStatusControllerTest {
 
         var body = result.getResponse().getContentAsString();
 
-        List<TaskStatusDTO> taskStatusDTOS = objectMapper.readValue(body, new TypeReference<>() {
-        });
+        List<TaskStatusDTO> taskStatusDTOS = objectMapper.readValue(body, new TypeReference<>() {});
 
         assertThat(taskStatusDTOS).isEmpty();
         assertThatJson(body).isArray();
@@ -296,7 +283,7 @@ public class TaskStatusControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(data));
 
-        var result = mockMvc.perform(request)
+        mockMvc.perform(request)
                 .andExpect(status().isCreated())
                 .andReturn();
 
