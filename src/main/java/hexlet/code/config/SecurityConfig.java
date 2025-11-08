@@ -39,6 +39,11 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/task_statuses", "/api/task_statuses/*").permitAll()
                         // Защищенные эндпоинты - требуют аутентификации
+                        .requestMatchers(HttpMethod.GET, "/api/tasks", "/api/tasks/*").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/tasks").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/tasks/*").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/tasks/*").authenticated()
+
                         .requestMatchers(HttpMethod.POST, "/api/task_statuses").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/task_statuses/*").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/task_statuses/*").authenticated()
