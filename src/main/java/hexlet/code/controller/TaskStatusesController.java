@@ -4,7 +4,6 @@ import hexlet.code.dto.taskStatus.TaskStatusCreateDTO;
 import hexlet.code.dto.taskStatus.TaskStatusDTO;
 import hexlet.code.dto.taskStatus.TaskStatusUpdateDTO;
 import hexlet.code.service.TaskStatusService;
-import hexlet.code.utils.UserUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,9 +17,6 @@ import java.util.List;
 public class TaskStatusesController {
     @Autowired
     private TaskStatusService taskStatusService;
-
-    @Autowired
-    private UserUtils userUtils;
 
     @GetMapping
     public ResponseEntity<List<TaskStatusDTO>> index() {

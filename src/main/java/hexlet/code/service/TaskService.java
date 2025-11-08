@@ -41,16 +41,16 @@ public class TaskService {
 
     public TaskDTO create(TaskCreateDTO taskCreateDTO) {
         Task task = taskMapper.map(taskCreateDTO);
-        taskRepository.save(task);
-        return taskMapper.map(task);
+        Task saved = taskRepository.save(task);
+        return taskMapper.map(saved);
     }
 
     public TaskDTO update(Long id, TaskUpdateDTO taskUpdateDTO) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
         taskMapper.update(taskUpdateDTO, task);
-        taskRepository.save(task);
-        return taskMapper.map(task);
+        Task updated = taskRepository.save(task);
+        return taskMapper.map(updated);
     }
 
     public void delete(Long id) {

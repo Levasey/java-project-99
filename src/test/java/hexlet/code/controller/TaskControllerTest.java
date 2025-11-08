@@ -22,7 +22,6 @@ import hexlet.code.util.ModelGenerator;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openapitools.jackson.nullable.JsonNullable;
 import org.openapitools.jackson.nullable.JsonNullableModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -92,7 +91,7 @@ public class TaskControllerTest {
     }
 
     @Test
-    void Index() throws Exception {
+    void testIndex() throws Exception {
         var result = mockMvc.perform(get("/api/tasks"))
                 .andExpect(status().isOk())
                 .andReturn();

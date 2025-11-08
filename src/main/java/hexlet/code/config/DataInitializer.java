@@ -1,7 +1,9 @@
 package hexlet.code.config;
 
+import hexlet.code.model.Label;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
+import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
 import hexlet.code.service.CustomUserDetailsService;
@@ -19,6 +21,9 @@ public class DataInitializer implements ApplicationRunner {
 
     @Autowired
     private TaskStatusRepository taskStatusRepository;
+
+    @Autowired
+    private LabelRepository labelRepository;
 
     @Autowired
     private CustomUserDetailsService userService;
@@ -41,6 +46,11 @@ public class DataInitializer implements ApplicationRunner {
             createTaskStatus("to publish", "to_publish");
             createTaskStatus("published", "published");
         }
+
+        if (labelRepository.findAll().isEmpty()) {
+            createLabel("feature");
+            createLabel("bug");
+        }
     }
 
     private TaskStatus createTaskStatus(String name, String slug) {
@@ -49,5 +59,12 @@ public class DataInitializer implements ApplicationRunner {
         taskStatus.setSlug(slug);
         taskStatusRepository.save(taskStatus);
         return taskStatus;
+    }
+
+    private Label createLabel(String name) {
+        var label = new Label();
+        label.setName(name);
+        labelRepository.save(label);
+        return label;
     }
 }

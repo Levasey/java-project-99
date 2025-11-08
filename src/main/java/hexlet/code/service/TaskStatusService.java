@@ -18,7 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional
 public class TaskStatusService {
-
     @Autowired
     private TaskStatusRepository taskStatusRepository;
 

@@ -1,9 +1,9 @@
 plugins {
-	id 'java'
-	id 'jacoco'
-	id "org.sonarqube" version "7.0.1.6134"
-	id 'org.springframework.boot' version '3.5.8-SNAPSHOT'
-	id 'io.spring.dependency-management' version '1.1.7'
+    id 'java'
+    id 'jacoco'
+    id "org.sonarqube" version "7.0.1.6134"
+    id 'org.springframework.boot' version '3.5.8-SNAPSHOT'
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'hexlet.code'
@@ -11,140 +11,144 @@ version = '0.0.1-SNAPSHOT'
 description = 'Task manager'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
-	mavenCentral()
-	maven { url = 'https://repo.spring.io/snapshot' }
+    mavenCentral()
+    maven { url = 'https://repo.spring.io/snapshot' }
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	testImplementation 'org.springframework.security:spring-security-test'
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	runtimeOnly 'com.h2database:h2'
-	runtimeOnly 'org.postgresql:postgresql'
-	annotationProcessor 'org.projectlombok:lombok'
-	// https://mvnrepository.com/artifact/org.mapstruct/mapstruct
-	implementation 'org.mapstruct:mapstruct:1.6.3'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-	testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-	implementation 'net.datafaker:datafaker:2.4.2'
-	// https://mvnrepository.com/artifact/org.openapitools/jackson-databind-nullable
-	implementation 'org.openapitools:jackson-databind-nullable:0.2.8'
-	// https://mvnrepository.com/artifact/org.instancio/instancio-junit
-	testImplementation 'org.instancio:instancio-junit:5.5.1'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    // https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0-M1'
+    // https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-api
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:3.0.0-M1'
+    testImplementation 'org.springframework.security:spring-security-test'
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
+    annotationProcessor 'org.projectlombok:lombok'
+    // https://mvnrepository.com/artifact/org.mapstruct/mapstruct
+    implementation 'org.mapstruct:mapstruct:1.6.3'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+    testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+    implementation 'net.datafaker:datafaker:2.4.2'
+    // https://mvnrepository.com/artifact/org.openapitools/jackson-databind-nullable
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.8'
+    // https://mvnrepository.com/artifact/org.instancio/instancio-junit
+    testImplementation 'org.instancio:instancio-junit:5.5.1'
 // https://mvnrepository.com/artifact/net.javacrumbs.json-unit/json-unit-assertj
-	testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:5.0.0'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	testCompileOnly("org.projectlombok:lombok")
-	testAnnotationProcessor("org.projectlombok:lombok")
+    testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:5.0.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testCompileOnly("org.projectlombok:lombok")
+    testAnnotationProcessor("org.projectlombok:lombok")
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
-	finalizedBy jacocoTestReport
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
 }
 
 tasks.jacocoTestReport {
-	dependsOn test
-	reports {
-		xml.required.set(true)
-		html.required.set(true)
-		csv.required.set(false)
-	}
+    dependsOn test
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
 
-	afterEvaluate {
-		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, exclude: [
-					'**/model/**',
-					'**/config/**',
-					'**/Application.class',
-					'**/entity/**',
-					'**/dto/**'
-			])
-		}))
-	}
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    '**/model/**',
+                    '**/config/**',
+                    '**/Application.class',
+                    '**/entity/**',
+                    '**/dto/**'
+            ])
+        }))
+    }
 }
 
 tasks.jacocoTestCoverageVerification {
-	dependsOn jacocoTestReport
-	violationRules {
-		rule {
-			limit {
-				minimum = "0.6".toBigDecimal()
-			}
-		}
-		rule {
-			enabled = true
-			element = 'CLASS'
-			excludes = [
-					'*.model.*',
-					'*.config.*',
-					'*.Application',
-					'*.entity.*',
-					'*.dto.*'
-			]
-		}
-	}
+    dependsOn jacocoTestReport
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.6".toBigDecimal()
+            }
+        }
+        rule {
+            enabled = true
+            element = 'CLASS'
+            excludes = [
+                    '*.model.*',
+                    '*.config.*',
+                    '*.Application',
+                    '*.entity.*',
+                    '*.dto.*'
+            ]
+        }
+    }
 }
 
 sonarqube {
-	properties {
-		property "sonar.projectKey", "Levasey_java-project-99"
-		property "sonar.organization", "levasey"
-		property "sonar.host.url", "https://sonarcloud.io"
+    properties {
+        property "sonar.projectKey", "Levasey_java-project-99"
+        property "sonar.organization", "levasey"
+        property "sonar.host.url", "https://sonarcloud.io"
 
-		// Java configuration
-		property "sonar.sourceEncoding", "UTF-8"
-		property "sonar.java.source", "21"
-		property "sonar.java.binaries", "build/classes/java/main"
-		property "sonar.java.test.binaries", "build/classes/java/test"
-		property "sonar.java.libraries", "build/libs/*.jar"
+        // Java configuration
+        property "sonar.sourceEncoding", "UTF-8"
+        property "sonar.java.source", "21"
+        property "sonar.java.binaries", "build/classes/java/main"
+        property "sonar.java.test.binaries", "build/classes/java/test"
+        property "sonar.java.libraries", "build/libs/*.jar"
 
-		// Coverage configuration - UPDATED
-		property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
-		property "sonar.coverage.exclusions", "**/model/**,**/config/**,**/entity/**,**/dto/**,**/Application.java"
+        // Coverage configuration - UPDATED
+        property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
+        property "sonar.coverage.exclusions", "**/model/**,**/config/**,**/entity/**,**/dto/**,**/Application.java"
 
-		// Test configuration
-		property "sonar.junit.reportPaths", "build/test-results/test"
-		property "sonar.tests", "src/test/java"
-		property "sonar.test.exclusions", "**/model/**,**/config/**,**/entity/**,**/dto/**"
+        // Test configuration
+        property "sonar.junit.reportPaths", "build/test-results/test"
+        property "sonar.tests", "src/test/java"
+        property "sonar.test.exclusions", "**/model/**,**/config/**,**/entity/**,**/dto/**"
 
-		// Source configuration
-		property "sonar.sources", "src/main/java"
-		property "sonar.tests", "src/test/java"
+        // Source configuration
+        property "sonar.sources", "src/main/java"
+        property "sonar.tests", "src/test/java"
 
-		// Quality Gate
-		property "sonar.qualitygate.wait", "false"
-	}
+        // Quality Gate
+        property "sonar.qualitygate.wait", "false"
+    }
 }
 
 tasks.check {
-	dependsOn tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification
+    dependsOn tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification
 }
 
 tasks.clean {
-	doLast {
-		delete("build")
-	}
+    doLast {
+        delete("build")
+    }
 }
 
 tasks.named('sonar') {
-	dependsOn test, jacocoTestReport
+    dependsOn test, jacocoTestReport
 }

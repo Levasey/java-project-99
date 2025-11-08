@@ -1,8 +1,8 @@
 package hexlet.code.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -18,9 +18,9 @@ import java.util.List;
 @Setter
 @Getter
 @Entity
-@Table(name = "tasks")
+@Table(name = "labels")
 @EntityListeners(AuditingEntityListener.class)
-public class Task implements BaseEntity {
+public class Label implements BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ToString.Include
@@ -28,29 +28,13 @@ public class Task implements BaseEntity {
     private Long id;
 
     @NotBlank(message = "Name cannot be blank")
-    @Size(min = 1, message = "Name must be at least 1 character long")
+    @Column(unique = true)
+    @Size(min = 3, max = 1000, message = "Name must be between 3 and 1000 characters long")
     private String name;
 
-    private int index;
-
-    private String description;
-
-    @ManyToMany
-    @JoinTable(
-            name = "task_labels",
-            joinColumns = @JoinColumn(name = "task_id"),
-            inverseJoinColumns = @JoinColumn(name = "label_id")
-    )
-    List<Label> labels = new ArrayList<>();
-
-    @NotNull(message = "Task status cannot be blank")
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "task_status_id")
-    private TaskStatus taskStatus;
-
-    @ManyToOne
-    @JoinColumn(name = "assignee_id")
-    private User assignee;
+    @ManyToMany(mappedBy = "labels")
+    @JsonIgnore
+    List<Task> tasks = new ArrayList<>();
 
     @CreatedDate
     private LocalDateTime createdAt;

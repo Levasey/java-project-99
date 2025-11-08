@@ -9,6 +9,12 @@ spring:
       hibernate:
         format_sql: true
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    api-docs:
+      path: /api-docs
+
 rsa:
   private-key: classpath:certs/private.pem
   public-key: classpath:certs/public.pem
