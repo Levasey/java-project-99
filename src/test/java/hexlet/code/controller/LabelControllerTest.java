@@ -2,13 +2,16 @@ package hexlet.code.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hexlet.code.dto.label.LabelCreateDTO;
 import hexlet.code.dto.label.LabelDTO;
+import hexlet.code.dto.label.LabelUpdateDTO;
 import hexlet.code.model.Label;
 import hexlet.code.repository.LabelRepository;
 import hexlet.code.util.ModelGenerator;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.openapitools.jackson.nullable.JsonNullableModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -52,6 +55,7 @@ public class LabelControllerTest {
     private LabelRepository labelRepository;
 
     private Label testLabel;
+    private Label anotherLabel;
 
     @BeforeEach
     void setUp() {
@@ -64,7 +68,10 @@ public class LabelControllerTest {
         objectMapper.registerModule(new JsonNullableModule());
 
         testLabel = Instancio.of(modelGenerator.getLabelModel()).create();
+        anotherLabel = Instancio.of(modelGenerator.getLabelModel()).create();
+
         labelRepository.save(testLabel);
+        labelRepository.save(anotherLabel);
     }
 
     @Test
@@ -77,9 +84,14 @@ public class LabelControllerTest {
 
         List<LabelDTO> labelDTOS = objectMapper.readValue(body, new TypeReference<List<LabelDTO>>() {});
 
-        assertThat(labelDTOS).hasSize(1);
-        assertThatJson(body).isNotNull();
+        assertThat(labelDTOS).hasSize(2);
         assertThatJson(body).isArray();
+
+        // Проверяем, что возвращаемые данные содержат ожидаемые поля
+        assertThat(labelDTOS.get(0).getId()).isNotNull();
+        assertThat(labelDTOS.get(0).getName()).isNotNull();
+        assertThat(labelDTOS.get(1).getId()).isNotNull();
+        assertThat(labelDTOS.get(1).getName()).isNotNull();
     }
 
     @Test
@@ -98,19 +110,18 @@ public class LabelControllerTest {
 
     @Test
     void testShowNotFound() throws Exception {
-        var result = mockMvc.perform(get("/api/labels/9999"))
-                .andExpect(status().isNotFound())
-                .andReturn();
+        mockMvc.perform(get("/api/labels/9999"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
     void testCreate() throws Exception {
-        var data = new HashMap<String, Object>();
-        data.put("name", "Created name");
+        var labelCreateDTO = new LabelCreateDTO();
+        labelCreateDTO.setName("New Label");
 
         var request = post("/api/labels")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(data));
+                .content(objectMapper.writeValueAsString(labelCreateDTO));
 
         var result = mockMvc.perform(request)
                 .andExpect(status().isCreated())
@@ -120,26 +131,81 @@ public class LabelControllerTest {
 
         LabelDTO createdLabelDTO = objectMapper.readValue(body, LabelDTO.class);
 
-        assertThat(createdLabelDTO.getName()).isEqualTo("Created name");
+        assertThat(createdLabelDTO.getId()).isNotNull();
+        assertThat(createdLabelDTO.getName()).isEqualTo("New Label");
+
+        // Проверяем, что метка действительно сохранена в базе
+        Label savedLabel = labelRepository.findById(createdLabelDTO.getId()).orElse(null);
+        assertThat(savedLabel).isNotNull();
+        assertThat(savedLabel.getName()).isEqualTo("New Label");
+    }
+
+    @Test
+    void testCreateWithDuplicateName() throws Exception {
+        // Сначала создаем метку
+        var firstLabel = new LabelCreateDTO();
+        firstLabel.setName("Duplicate Name");
+
+        var firstRequest = post("/api/labels")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(firstLabel));
+
+        mockMvc.perform(firstRequest).andExpect(status().isCreated());
+
+        // Пытаемся создать метку с таким же именем
+        var secondLabel = new LabelCreateDTO();
+        secondLabel.setName("Duplicate Name");
+
+        var secondRequest = post("/api/labels")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(secondLabel));
+
+        mockMvc.perform(secondRequest)
+                .andExpect(status().isConflict());
     }
 
     @Test
     void testUpdate() throws Exception {
-        var data = new HashMap<>();
-        data.put("name", "Updated name");
+        var labelUpdateDTO = new LabelUpdateDTO();
+        labelUpdateDTO.setName(JsonNullable.of("Updated Label Name"));
 
         var request = put("/api/labels/" + testLabel.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(data));
+                .content(objectMapper.writeValueAsString(labelUpdateDTO));
 
-        var result = mockMvc.perform(request).andExpect(status().isOk()).andReturn();
+        var result = mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn();
+
         var body = result.getResponse().getContentAsString();
 
         LabelDTO updatedLabelDTO = objectMapper.readValue(body, LabelDTO.class);
 
-        Label updatedLabel = labelRepository.findById(updatedLabelDTO.getId()).get();
+        assertThat(updatedLabelDTO.getId()).isEqualTo(testLabel.getId());
+        assertThat(updatedLabelDTO.getName()).isEqualTo("Updated Label Name");
+
+        // Проверяем обновление в базе данных
+        Label updatedLabel = labelRepository.findById(testLabel.getId()).orElse(null);
         assertThat(updatedLabel).isNotNull();
-        assertThat(updatedLabel.getName()).isEqualTo("Updated name");
+        assertThat(updatedLabel.getName()).isEqualTo("Updated Label Name");
+    }
+
+    @Test
+    void testUpdateWithDuplicateName() throws Exception {
+        // Создаем вторую метку
+        var secondLabel = Instancio.of(modelGenerator.getLabelModel()).create();
+        labelRepository.save(secondLabel);
+
+        // Пытаемся обновить первую метку с именем второй
+        var labelUpdateDTO = new LabelUpdateDTO();
+        labelUpdateDTO.setName(JsonNullable.of(secondLabel.getName()));
+
+        var request = put("/api/labels/" + testLabel.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(labelUpdateDTO));
+
+        mockMvc.perform(request)
+                .andExpect(status().isConflict());
     }
 
     @Test
