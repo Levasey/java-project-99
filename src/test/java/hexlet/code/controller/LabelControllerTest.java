@@ -88,10 +88,8 @@ public class LabelControllerTest {
         assertThatJson(body).isArray();
 
         // Проверяем, что возвращаемые данные содержат ожидаемые поля
-        assertThat(labelDTOS.get(0).getId()).isNotNull();
-        assertThat(labelDTOS.get(0).getName()).isNotNull();
-        assertThat(labelDTOS.get(1).getId()).isNotNull();
-        assertThat(labelDTOS.get(1).getName()).isNotNull();
+        assertThat(labelDTOS.getFirst().getId()).isNotNull();
+        assertThat(labelDTOS.getFirst().getName()).isNotNull();
     }
 
     @Test
