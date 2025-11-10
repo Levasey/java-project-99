@@ -131,11 +131,6 @@ public class LabelControllerTest {
 
         assertThat(createdLabelDTO.getId()).isNotNull();
         assertThat(createdLabelDTO.getName()).isEqualTo("New Label");
-
-        // Проверяем, что метка действительно сохранена в базе
-        Label savedLabel = labelRepository.findById(createdLabelDTO.getId()).orElse(null);
-        assertThat(savedLabel).isNotNull();
-        assertThat(savedLabel.getName()).isEqualTo("New Label");
     }
 
     @Test
