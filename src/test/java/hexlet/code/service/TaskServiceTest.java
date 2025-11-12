@@ -3,9 +3,11 @@ package hexlet.code.service;
 import hexlet.code.dto.task.TaskCreateDTO;
 import hexlet.code.dto.task.TaskUpdateDTO;
 import hexlet.code.exception.ResourceNotFoundException;
+import hexlet.code.model.Label;
 import hexlet.code.model.Task;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
+import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
@@ -17,6 +19,9 @@ import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import hexlet.code.dto.task.TaskParamsDTO;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -33,6 +38,9 @@ class TaskServiceTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private LabelRepository labelRepository;
 
     @Autowired
     private TaskStatusRepository taskStatusRepository;
@@ -59,10 +67,84 @@ class TaskServiceTest {
     }
 
     @Test
-    void testFindAll() {
-        var tasks = taskService.findAll();
-        assertThat(tasks).hasSize(1);
-        assertThat(tasks.get(0).getName()).isEqualTo(testTask.getName());
+    void testFindAllWithFilters() {
+        // Создаем дополнительные тестовые данные
+        User anotherUser = Instancio.of(modelGenerator.getUserModel()).create();
+        userRepository.save(anotherUser);
+
+        TaskStatus anotherStatus = Instancio.of(modelGenerator.getTaskStatusModel()).create();
+        taskStatusRepository.save(anotherStatus);
+
+        Label testLabel = Instancio.of(modelGenerator.getLabelModel()).create();
+        labelRepository.save(testLabel);
+
+        Task taskWithLabel = Instancio.of(modelGenerator.getTaskModel()).create();
+        taskWithLabel.setName("Special task with label");
+        taskWithLabel.setAssignee(anotherUser);
+        taskWithLabel.setTaskStatus(anotherStatus);
+        taskWithLabel.getLabels().add(testLabel);
+        taskRepository.save(taskWithLabel);
+
+        // Тест фильтрации по названию
+        TaskParamsDTO titleParams = new TaskParamsDTO();
+        titleParams.setTitleCont("Special");
+        Pageable pageable = PageRequest.of(0, 10);
+
+        var filteredByTitle = taskService.findAll(titleParams, pageable);
+        assertThat(filteredByTitle.getContent()).hasSize(1);
+        assertThat(filteredByTitle.getContent().get(0).getName()).isEqualTo("Special task with label");
+
+        // Тест фильтрации по исполнителю
+        TaskParamsDTO assigneeParams = new TaskParamsDTO();
+        assigneeParams.setAssigneeId(anotherUser.getId());
+
+        var filteredByAssignee = taskService.findAll(assigneeParams, pageable);
+        assertThat(filteredByAssignee.getContent()).hasSize(1);
+        assertThat(filteredByAssignee.getContent().get(0).getAssigneeId()).isEqualTo(anotherUser.getId());
+
+        // Тест фильтрации по статусу
+        TaskParamsDTO statusParams = new TaskParamsDTO();
+        statusParams.setStatus(anotherStatus.getSlug());
+
+        var filteredByStatus = taskService.findAll(statusParams, pageable);
+        assertThat(filteredByStatus.getContent()).hasSize(1);
+        assertThat(filteredByStatus.getContent().get(0).getTaskStatusId()).isEqualTo(anotherStatus.getId());
+
+        // Тест фильтрации по метке
+        TaskParamsDTO labelParams = new TaskParamsDTO();
+        labelParams.setLabelId(testLabel.getId());
+
+        var filteredByLabel = taskService.findAll(labelParams, pageable);
+        assertThat(filteredByLabel.getContent()).hasSize(1);
+        assertThat(filteredByLabel.getContent().get(0).getId()).isEqualTo(taskWithLabel.getId());
+
+        // Тест комбинированной фильтрации
+        TaskParamsDTO combinedParams = new TaskParamsDTO();
+        combinedParams.setTitleCont("Special");
+        combinedParams.setAssigneeId(anotherUser.getId());
+
+        var filteredCombined = taskService.findAll(combinedParams, pageable);
+        assertThat(filteredCombined.getContent()).hasSize(1);
+    }
+
+    @Test
+    void testFindAllWithoutFilters() {
+        Pageable pageable = PageRequest.of(0, 10);
+        TaskParamsDTO emptyParams = new TaskParamsDTO();
+
+        var allTasks = taskService.findAll(emptyParams, pageable);
+        assertThat(allTasks.getContent()).hasSize(1); // Только одна задача из setUp
+    }
+
+    @Test
+    void testFindAllWithNonExistingFilters() {
+        Pageable pageable = PageRequest.of(0, 10);
+
+        TaskParamsDTO params = new TaskParamsDTO();
+        params.setAssigneeId(9999L); // Несуществующий пользователь
+
+        var result = taskService.findAll(params, pageable);
+        assertThat(result.getContent()).isEmpty();
     }
 
     @Test

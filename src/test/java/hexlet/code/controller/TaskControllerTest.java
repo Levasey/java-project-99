@@ -12,9 +12,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.dto.task.TaskDTO;
+import hexlet.code.model.Label;
 import hexlet.code.model.Task;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
+import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
@@ -26,6 +28,7 @@ import org.openapitools.jackson.nullable.JsonNullableModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -60,17 +63,23 @@ public class TaskControllerTest {
     @Autowired
     private TaskStatusRepository taskStatusRepository;
 
+    @Autowired
+    private LabelRepository labelRepository;
+
     private Task testTask;
 
     private User testUser;
 
     private TaskStatus testTaskStatus;
 
+    private Label testLabel;
+
     @BeforeEach
     void setUp() {
         taskRepository.deleteAll();
         userRepository.deleteAll();
         taskStatusRepository.deleteAll();
+        labelRepository.deleteAll();
 
         mockMvc = MockMvcBuilders.webAppContextSetup(wac)
                 .defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
@@ -84,9 +93,13 @@ public class TaskControllerTest {
         testTaskStatus = Instancio.of(modelGenerator.getTaskStatusModel()).create();
         taskStatusRepository.save(testTaskStatus);
 
+        testLabel = Instancio.of(modelGenerator.getLabelModel()).create();
+        labelRepository.save(testLabel);
+
         testTask = Instancio.of(modelGenerator.getTaskModel()).create();
         testTask.setAssignee(testUser);
         testTask.setTaskStatus(testTaskStatus);
+        testTask.getLabels().add(testLabel);
         taskRepository.save(testTask);
     }
 
@@ -98,11 +111,116 @@ public class TaskControllerTest {
 
         var body = result.getResponse().getContentAsString();
 
-        List<TaskDTO> tasks = objectMapper.readValue(body, new TypeReference<>() {});
+        // Используем Map для парсинга ответа вместо Page
+        var responseMap = objectMapper.readValue(body, new TypeReference<Map<String, Object>>() {});
 
-        assertThat(tasks).hasSize(1);
-        assertThatJson(body).isNotNull();
-        assertThatJson(body).isArray();
+        assertThat(responseMap).containsKeys("content", "totalElements", "totalPages", "size", "number");
+
+        var content = (List<Map<String, Object>>) responseMap.get("content");
+        assertThat(content).hasSize(1);
+
+        var taskData = content.get(0);
+        assertThat(taskData.get("name")).isEqualTo(testTask.getName());
+        assertThat(taskData.get("description")).isEqualTo(testTask.getDescription());
+    }
+
+    @Test
+    void testIndexWithFilters() throws Exception {
+        // Создаем дополнительные данные для тестирования фильтров
+        User anotherUser = Instancio.of(modelGenerator.getUserModel()).create();
+        userRepository.save(anotherUser);
+
+        TaskStatus anotherStatus = Instancio.of(modelGenerator.getTaskStatusModel()).create();
+        taskStatusRepository.save(anotherStatus);
+
+        Label anotherLabel = Instancio.of(modelGenerator.getLabelModel()).create();
+        labelRepository.save(anotherLabel);
+
+        Task filteredTask = Instancio.of(modelGenerator.getTaskModel()).create();
+        filteredTask.setName("Filtered task name");
+        filteredTask.setAssignee(anotherUser);
+        filteredTask.setTaskStatus(anotherStatus);
+        filteredTask.getLabels().add(anotherLabel);
+        taskRepository.save(filteredTask);
+
+        // Тест фильтрации по названию
+        var result = mockMvc.perform(get("/api/tasks")
+                        .param("titleCont", "Filtered"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var body = result.getResponse().getContentAsString();
+        var responseMap = objectMapper.readValue(body, new TypeReference<Map<String, Object>>() {});
+        var content = (List<Map<String, Object>>) responseMap.get("content");
+
+        assertThat(content).hasSize(1);
+        assertThat(content.get(0).get("name")).isEqualTo("Filtered task name");
+
+        // Тест фильтрации по исполнителю
+        result = mockMvc.perform(get("/api/tasks")
+                        .param("assigneeId", anotherUser.getId().toString()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        body = result.getResponse().getContentAsString();
+        responseMap = objectMapper.readValue(body, new TypeReference<Map<String, Object>>() {});
+        content = (List<Map<String, Object>>) responseMap.get("content");
+
+        assertThat(content).hasSize(1);
+        assertThat(content.get(0).get("assigneeId")).isEqualTo(anotherUser.getId().intValue());
+
+        // Тест фильтрации по статусу
+        result = mockMvc.perform(get("/api/tasks")
+                        .param("status", anotherStatus.getSlug()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        body = result.getResponse().getContentAsString();
+        responseMap = objectMapper.readValue(body, new TypeReference<Map<String, Object>>() {});
+        content = (List<Map<String, Object>>) responseMap.get("content");
+
+        assertThat(content).hasSize(1);
+        assertThat(content.get(0).get("taskStatusId")).isEqualTo(anotherStatus.getId().intValue());
+
+        // Тест фильтрации по метке
+        result = mockMvc.perform(get("/api/tasks")
+                        .param("labelId", anotherLabel.getId().toString()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        body = result.getResponse().getContentAsString();
+        responseMap = objectMapper.readValue(body, new TypeReference<Map<String, Object>>() {});
+        content = (List<Map<String, Object>>) responseMap.get("content");
+
+        assertThat(content).hasSize(1);
+        assertThat(content.get(0).get("id")).isEqualTo(filteredTask.getId().intValue());
+
+        // Тест комбинированной фильтрации
+        result = mockMvc.perform(get("/api/tasks")
+                        .param("titleCont", "Filtered")
+                        .param("assigneeId", anotherUser.getId().toString()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        body = result.getResponse().getContentAsString();
+        responseMap = objectMapper.readValue(body, new TypeReference<Map<String, Object>>() {});
+        content = (List<Map<String, Object>>) responseMap.get("content");
+
+        assertThat(content).hasSize(1);
+    }
+
+    @Test
+    void testIndexWithEmptyFilters() throws Exception {
+        var result = mockMvc.perform(get("/api/tasks"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var body = result.getResponse().getContentAsString();
+        var responseMap = objectMapper.readValue(body, new TypeReference<Map<String, Object>>() {});
+        var content = (List<Map<String, Object>>) responseMap.get("content");
+
+        // Должна вернуться одна задача из setUp
+        assertThat(content).hasSize(1);
     }
 
     @Test
