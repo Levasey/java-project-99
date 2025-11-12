@@ -17,17 +17,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -54,6 +55,8 @@ public class LabelControllerTest {
     @Autowired
     private LabelRepository labelRepository;
 
+    private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor token;
+
     private Label testLabel;
     private Label anotherLabel;
 
@@ -69,6 +72,7 @@ public class LabelControllerTest {
 
         testLabel = Instancio.of(modelGenerator.getLabelModel()).create();
         anotherLabel = Instancio.of(modelGenerator.getLabelModel()).create();
+        token = jwt().jwt(builder -> builder.subject("hexlet@example.com"));
 
         labelRepository.save(testLabel);
         labelRepository.save(anotherLabel);
@@ -76,7 +80,7 @@ public class LabelControllerTest {
 
     @Test
     void testIndex() throws Exception {
-        var result = mockMvc.perform(get("/api/labels"))
+        var result = mockMvc.perform(get("/api/labels").with(jwt()))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -94,7 +98,7 @@ public class LabelControllerTest {
 
     @Test
     void testShow() throws Exception {
-        var result = mockMvc.perform(get("/api/labels/" + testLabel.getId()))
+        var result = mockMvc.perform(get("/api/labels/" + testLabel.getId()).with(jwt()))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -117,7 +121,7 @@ public class LabelControllerTest {
         var labelCreateDTO = new LabelCreateDTO();
         labelCreateDTO.setName("New Label");
 
-        var request = post("/api/labels")
+        var request = post("/api/labels").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(labelCreateDTO));
 
@@ -139,7 +143,7 @@ public class LabelControllerTest {
         var firstLabel = new LabelCreateDTO();
         firstLabel.setName("Duplicate Name");
 
-        var firstRequest = post("/api/labels")
+        var firstRequest = post("/api/labels").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(firstLabel));
 
@@ -149,7 +153,7 @@ public class LabelControllerTest {
         var secondLabel = new LabelCreateDTO();
         secondLabel.setName("Duplicate Name");
 
-        var secondRequest = post("/api/labels")
+        var secondRequest = post("/api/labels").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(secondLabel));
 
@@ -162,7 +166,7 @@ public class LabelControllerTest {
         var labelUpdateDTO = new LabelUpdateDTO();
         labelUpdateDTO.setName(JsonNullable.of("Updated Label Name"));
 
-        var request = put("/api/labels/" + testLabel.getId())
+        var request = put("/api/labels/" + testLabel.getId()).with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(labelUpdateDTO));
 
@@ -193,7 +197,7 @@ public class LabelControllerTest {
         var labelUpdateDTO = new LabelUpdateDTO();
         labelUpdateDTO.setName(JsonNullable.of(secondLabel.getName()));
 
-        var request = put("/api/labels/" + testLabel.getId())
+        var request = put("/api/labels/" + testLabel.getId()).with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(labelUpdateDTO));
 
@@ -205,7 +209,7 @@ public class LabelControllerTest {
     void testUpdateNotFound() throws Exception {
         var data = Map.of("name", "Updated Name");
 
-        var request = put("/api/labels/9999")
+        var request = put("/api/labels/9999").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(data));
 
@@ -215,7 +219,7 @@ public class LabelControllerTest {
 
     @Test
     void testDelete() throws Exception {
-        var request = delete("/api/labels/" + testLabel.getId());
+        var request = delete("/api/labels/" + testLabel.getId()).with(jwt());
         mockMvc.perform(request).andExpect(status().isNoContent());
 
         Label label = labelRepository.findById(testLabel.getId()).orElse(null);
@@ -224,7 +228,7 @@ public class LabelControllerTest {
 
     @Test
     void testDeleteNotFound() throws Exception {
-        mockMvc.perform(delete("/api/labels/9999"))
+        mockMvc.perform(delete("/api/labels/9999").with(jwt()))
                 .andExpect(status().isNotFound());
     }
 }

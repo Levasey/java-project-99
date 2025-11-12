@@ -9,13 +9,13 @@ import hexlet.code.mapper.TaskMapper;
 import hexlet.code.model.Task;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.specification.TaskSpecification;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,10 +31,12 @@ public class TaskService {
     private TaskSpecification taskSpecification;
 
     @Transactional(readOnly = true)
-    public Page<TaskDTO> findAll(TaskParamsDTO params, Pageable pageable) {
+    public List<TaskDTO> findAll(TaskParamsDTO params) {
         Specification<Task> specification = taskSpecification.build(params);
-        return taskRepository.findAll(specification, pageable)
-                .map(taskMapper::map);
+        return taskRepository.findAll(specification)
+                .stream()
+                .map(taskMapper::map)
+                .toList();
     }
 
     @Transactional(readOnly = true)

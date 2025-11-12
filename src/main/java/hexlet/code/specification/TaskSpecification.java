@@ -2,7 +2,6 @@ package hexlet.code.specification;
 
 import hexlet.code.dto.task.TaskParamsDTO;
 import hexlet.code.model.Task;
-import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -13,7 +12,7 @@ public class TaskSpecification {
         return withAssigneeId(params.getAssigneeId())
                 .and(withLabelId(params.getLabelId()))
                 .and(withTitleCont(params.getTitleCont()))
-                .and(withStatusSlug(params.getStatus()));
+                .and(withStatus(params.getStatus()));
     }
 
     private Specification<Task> withAssigneeId(Long assigneeId) {
@@ -22,15 +21,9 @@ public class TaskSpecification {
     }
 
     private Specification<Task> withLabelId(Long labelId) {
-        return (root, query, cb) ->
-        {
-            if (labelId == null) {
-                return cb.conjunction();
-            }
-            Join<Object, Object> labelsJoin = root.join("labels", JoinType.INNER);
-            query.distinct(true);
-            return cb.equal(labelsJoin.get("id"), labelId);
-        };
+        return ((root, query, cb) ->
+                labelId == null ? cb.conjunction()
+                        : cb.equal(root.join("labels", JoinType.INNER).get("id"), labelId));
     }
 
     private Specification<Task> withTitleCont(String titleCont) {
@@ -39,10 +32,10 @@ public class TaskSpecification {
                         cb.like(cb.lower(root.get("name")), "%" + titleCont.toLowerCase() + "%");
     }
 
-    private Specification<Task> withStatusSlug(String statusSlug) {
+    private Specification<Task> withStatus(String status) {
         return (root, query, cb) ->
-                statusSlug == null ?
+                status == null ?
                         cb.conjunction() :
-                        cb.equal(root.get("taskStatus").get("slug"), statusSlug);
+                        cb.equal(root.get("taskStatus").get("slug"), status);
     }
 }

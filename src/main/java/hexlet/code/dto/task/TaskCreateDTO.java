@@ -14,10 +14,10 @@ import java.util.List;
 public class TaskCreateDTO {
     @NotBlank(message = "Name cannot be blank")
     @Size(min = 1, message = "Name must be at least 1 character long")
-    private String name;
+    private String title;
 
     private int index;
-    private String description;
+    private String content;
 
     @NotNull(message = "Task status is required")
     private Long taskStatusId;

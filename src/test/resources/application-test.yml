@@ -11,22 +11,8 @@ spring:
   h2:
     console:
       enabled: false
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: false
-    properties:
-      hibernate:
-        format_sql: true
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          public-key-location: ""  # Отключаем JWT
-    enabled: false  # Отключаем Spring Security
 
 logging:
   level:
     org.springframework: WARN
     org.hibernate: WARN
-    io.hexletspringblog: DEBUG

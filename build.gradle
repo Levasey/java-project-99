@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'jacoco'
     id "org.sonarqube" version "7.0.1.6134"
+    id "io.sentry.jvm.gradle" version "5.12.2"
     id 'org.springframework.boot' version '3.5.8-SNAPSHOT'
     id 'io.spring.dependency-management' version '1.1.7'
 }
@@ -22,6 +23,13 @@ configurations {
     }
 }
 
+sentry {
+    includeSourceContext = true
+    org = "chest-1n"
+    projectName = "java-spring-boot"
+    authToken = System.getenv("SENTRY_AUTH_TOKEN")
+}
+
 repositories {
     mavenCentral()
     maven { url = 'https://repo.spring.io/snapshot' }
@@ -33,28 +41,27 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    // https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
-    // https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-api
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.3.0'
-    testImplementation 'org.springframework.security:spring-security-test'
+
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    runtimeOnly 'com.h2database:h2'
-    runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
-    // https://mvnrepository.com/artifact/org.mapstruct/mapstruct
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
     implementation 'net.datafaker:datafaker:2.4.2'
     implementation 'org.openapitools:jackson-databind-nullable:0.2.8'
-    // https://mvnrepository.com/artifact/org.instancio/instancio-junit
+
+    testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.instancio:instancio-junit:5.5.1'
     testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:5.0.0'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
 }
 
 tasks.named('test') {

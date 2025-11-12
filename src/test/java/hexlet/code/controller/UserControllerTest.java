@@ -2,6 +2,7 @@ package hexlet.code.controller;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -27,6 +28,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -53,6 +55,8 @@ class UserControllerTest {
     @Autowired
     private ModelGenerator modelGenerator;
 
+    private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor token;
+
     private User testUser;
 
     @BeforeEach
@@ -65,13 +69,14 @@ class UserControllerTest {
                 .build();
 
         testUser = Instancio.of(modelGenerator.getUserModel()).create();
+        token = jwt().jwt(builder -> builder.subject("hexlet@example.com"));
         userRepository.save(testUser);
         om.registerModule(new JsonNullableModule());
     }
 
     @Test
     void testIndex() throws Exception {
-        var result = mockMvc.perform(get("/api/users"))
+        var result = mockMvc.perform(get("/api/users").with(jwt()))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -84,7 +89,7 @@ class UserControllerTest {
 
     @Test
     public void testShow() throws Exception {
-        var request = get("/api/users/" + testUser.getId());
+        var request = get("/api/users/" + testUser.getId()).with(jwt());
         var result = mockMvc.perform(request).andExpect(status().isOk()).andReturn();
         var body = result.getResponse().getContentAsString();
 
@@ -99,7 +104,8 @@ class UserControllerTest {
     public void testCreate() throws Exception {
         var data = Instancio.of(modelGenerator.getUserModel()).create();
 
-        var request = post("/api/users").contentType(MediaType.APPLICATION_JSON)
+        var request = post("/api/users").with(jwt())
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(data));
         mockMvc.perform(request).andExpect(status().isCreated());
 
@@ -119,7 +125,7 @@ class UserControllerTest {
         data.put("email", testUser.getEmail());
         data.put("password", "newPassword123");
 
-        var request = put("/api/users/" + testUser.getId())
+        var request = put("/api/users/" + testUser.getId()).with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(data));
 
@@ -137,7 +143,7 @@ class UserControllerTest {
         var data = new HashMap<>();
         data.put("firstName", "newFirstName");
 
-        var request = put("/api/users/" + testUser.getId())
+        var request = put("/api/users/" + testUser.getId()).with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(data));
 
@@ -153,7 +159,7 @@ class UserControllerTest {
 
     @Test
     public void testDelete() throws Exception {
-        var request = delete("/api/users/" + testUser.getId());
+        var request = delete("/api/users/" + testUser.getId()).with(jwt());
         mockMvc.perform(request).andExpect(status().isNoContent());
 
         var user = userRepository.findById(testUser.getId()).orElse(null);
@@ -165,7 +171,7 @@ class UserControllerTest {
         var data = Instancio.of(modelGenerator.getUserModel()).create();
         data.setEmail(testUser.getEmail()); // Используем существующий email
 
-        var request = post("/api/users")
+        var request = post("/api/users").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(data));
 
@@ -181,7 +187,7 @@ class UserControllerTest {
         var data = new HashMap<>();
         data.put("email", anotherUser.getEmail()); // Пытаемся использовать email другого пользователя
 
-        var request = put("/api/users/" + testUser.getId())
+        var request = put("/api/users/" + testUser.getId()).with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(data));
 
@@ -190,7 +196,7 @@ class UserControllerTest {
 
     @Test
     public void testShowNonExistentUser() throws Exception {
-        var request = get("/api/users/9999");
+        var request = get("/api/users/9999").with(jwt());
         mockMvc.perform(request).andExpect(status().isNotFound());
     }
 
@@ -199,7 +205,7 @@ class UserControllerTest {
         var data = new HashMap<>();
         data.put("firstName", "Mike");
 
-        var request = put("/api/users/9999")
+        var request = put("/api/users/9999").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(data));
 
@@ -220,7 +226,7 @@ class UserControllerTest {
         data.put("lastName", "Doe");
         data.put("password", "123"); // Слишком короткий пароль
 
-        var request = post("/api/users")
+        var request = post("/api/users").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(data));
 
@@ -230,7 +236,7 @@ class UserControllerTest {
     @Test
     void testUserMapping() throws Exception {
         // Проверяем корректность маппинга DTO
-        var result = mockMvc.perform(get("/api/users/" + testUser.getId()))
+        var result = mockMvc.perform(get("/api/users/" + testUser.getId()).with(jwt()))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -241,7 +247,6 @@ class UserControllerTest {
         assertThat(userDTO.getEmail()).isEqualTo(testUser.getEmail());
         assertThat(userDTO.getFirstName()).isEqualTo(testUser.getFirstName());
         assertThat(userDTO.getLastName()).isEqualTo(testUser.getLastName());
-        // Проверяем, что пароль не exposed в DTO
     }
 
     @Test
@@ -254,7 +259,7 @@ class UserControllerTest {
         }
         """;
 
-        var request = put("/api/users/" + testUser.getId())
+        var request = put("/api/users/" + testUser.getId()).with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(data);
 
@@ -263,7 +268,6 @@ class UserControllerTest {
         var updatedUser = userRepository.findById(testUser.getId()).orElse(null);
         assertThat(updatedUser).isNotNull();
         assertThat(updatedUser.getLastName()).isEqualTo("UpdatedLastName");
-        // firstName должен остаться прежним, так как он был явно установлен в null
     }
 
     @Test
@@ -272,7 +276,7 @@ class UserControllerTest {
         // Отправляем неполные данные
         data.put("email", "test@example.com");
 
-        var request = post("/api/users")
+        var request = post("/api/users").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(data));
 

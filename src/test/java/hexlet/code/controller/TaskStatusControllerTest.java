@@ -2,6 +2,7 @@ package hexlet.code.controller;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -52,6 +54,8 @@ public class TaskStatusControllerTest {
     @Autowired
     private ModelGenerator modelGenerator;
 
+    private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor token;
+
     private TaskStatus testTaskStatus;
 
     @BeforeEach
@@ -65,13 +69,14 @@ public class TaskStatusControllerTest {
         objectMapper.registerModule(new JsonNullableModule());
 
         testTaskStatus = Instancio.of(modelGenerator.getTaskStatusModel()).create();
+        token = jwt().jwt(builder -> builder.subject("hexlet@example.com"));
         taskStatusRepository.save(testTaskStatus);
 
     }
 
     @Test
     void testIndex() throws Exception {
-        var result = mockMvc.perform(get("/api/task_statuses"))
+        var result = mockMvc.perform(get("/api/task_statuses").with(jwt()))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -88,7 +93,7 @@ public class TaskStatusControllerTest {
     void testIndexWhenEmpty() throws Exception {
         taskStatusRepository.deleteAll();
 
-        var result = mockMvc.perform(get("/api/task_statuses"))
+        var result = mockMvc.perform(get("/api/task_statuses").with(jwt()))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -102,7 +107,7 @@ public class TaskStatusControllerTest {
 
     @Test
     void testShow() throws Exception {
-        var request = get("/api/task_statuses/" + testTaskStatus.getId());
+        var request = get("/api/task_statuses/" + testTaskStatus.getId()).with(jwt());
         var result = mockMvc.perform(request).andExpect(status().isOk()).andReturn();
         var body = result.getResponse().getContentAsString();
 
@@ -113,7 +118,7 @@ public class TaskStatusControllerTest {
 
     @Test
     void testShowNotFound() throws Exception {
-        var request = get("/api/task_statuses/99999");
+        var request = get("/api/task_statuses/99999").with(jwt());
         mockMvc.perform(request).andExpect(status().isNotFound());
     }
 
@@ -123,7 +128,7 @@ public class TaskStatusControllerTest {
         data.put("name", "Test Status");
         data.put("slug", "test-status");
 
-        var request = post("/api/task_statuses")
+        var request = post("/api/task_statuses").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(data));
 
@@ -143,7 +148,7 @@ public class TaskStatusControllerTest {
         data.put("name", "");
         data.put("slug", "valid-slug");
 
-        var request = post("/api/task_statuses")
+        var request = post("/api/task_statuses").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(data));
 
@@ -154,7 +159,7 @@ public class TaskStatusControllerTest {
         data2.put("name", "Valid Name");
         data2.put("slug", "");
 
-        var request2 = post("/api/task_statuses")
+        var request2 = post("/api/task_statuses").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(data2));
 
@@ -164,7 +169,7 @@ public class TaskStatusControllerTest {
         var data3 = new HashMap<>();
         data3.put("slug", "valid-slug");
 
-        var request3 = post("/api/task_statuses")
+        var request3 = post("/api/task_statuses").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(data3));
 
@@ -174,7 +179,7 @@ public class TaskStatusControllerTest {
         var data4 = new HashMap<>();
         data4.put("name", "Valid Name");
 
-        var request4 = post("/api/task_statuses")
+        var request4 = post("/api/task_statuses").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(data4));
 
@@ -187,7 +192,7 @@ public class TaskStatusControllerTest {
         data.put("name", "Test Status");
         data.put("slug", "test-status");
 
-        var request = put("/api/task_statuses/" + testTaskStatus.getId())
+        var request = put("/api/task_statuses/" + testTaskStatus.getId()).with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(data));
 
@@ -206,7 +211,7 @@ public class TaskStatusControllerTest {
         var data = new HashMap<>();
         data.put("name", "Partially Updated");
 
-        var request = put("/api/task_statuses/" + testTaskStatus.getId())
+        var request = put("/api/task_statuses/" + testTaskStatus.getId()).with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(data));
 
@@ -224,7 +229,7 @@ public class TaskStatusControllerTest {
         data.put("name", "");
         data.put("slug", "valid-slug");
 
-        var request = put("/api/task_statuses/" + testTaskStatus.getId())
+        var request = put("/api/task_statuses/" + testTaskStatus.getId()).with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(data));
 
@@ -248,7 +253,7 @@ public class TaskStatusControllerTest {
         data.put("name", "Updated Status");
         data.put("slug", "updated-status");
 
-        var request = put("/api/task_statuses/99999")
+        var request = put("/api/task_statuses/99999").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(data));
 
@@ -266,7 +271,7 @@ public class TaskStatusControllerTest {
 
     @Test
     void testDeleteNotFound() throws Exception {
-        var request = delete("/api/task_statuses/99999");
+        var request = delete("/api/task_statuses/99999").with(jwt());
         mockMvc.perform(request).andExpect(status().isNotFound());
     }
 
@@ -279,7 +284,7 @@ public class TaskStatusControllerTest {
         data.put("name", longName);
         data.put("slug", longSlug);
 
-        var request = post("/api/task_statuses")
+        var request = post("/api/task_statuses").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(data));
 
