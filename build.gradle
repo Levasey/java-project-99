@@ -64,6 +64,14 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
 }
 
+tasks.jacocoTestReport {
+    reports {
+        xml.required = true
+        csv.required = false
+        html.required = true
+    }
+}
+
 sonarqube {
     properties {
         property "sonar.projectKey", "Levasey_java-project-99"
