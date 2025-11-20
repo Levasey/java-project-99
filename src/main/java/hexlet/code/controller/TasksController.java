@@ -21,7 +21,10 @@ public class TasksController {
 
     @GetMapping
     public ResponseEntity<List<TaskDTO>> index(TaskParamsDTO params) {
-        return ResponseEntity.ok(taskService.findAll(params));
+        var tasks = taskService.findAll(params);
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(tasks.size()))
+                .body(tasks);
     }
 
     @GetMapping("/{id}")

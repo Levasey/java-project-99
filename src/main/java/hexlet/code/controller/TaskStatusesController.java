@@ -20,7 +20,10 @@ public class TaskStatusesController {
 
     @GetMapping
     public ResponseEntity<List<TaskStatusDTO>> index() {
-        return ResponseEntity.ok(taskStatusService.findAll());
+        var taskStatuses = taskStatusService.findAll();
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(taskStatuses.size()))
+                .body(taskStatuses);
     }
 
     @GetMapping("/{id}")

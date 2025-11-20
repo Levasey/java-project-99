@@ -37,6 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/api/login").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/api/users/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/task_statuses", "/api/task_statuses/*").permitAll()
                         // Защищенные эндпоинты - требуют аутентификации
                         .requestMatchers(HttpMethod.GET, "/api/tasks", "/api/tasks/*").authenticated()

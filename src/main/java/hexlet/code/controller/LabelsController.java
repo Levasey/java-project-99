@@ -20,7 +20,10 @@ public class LabelsController {
 
     @GetMapping
     public ResponseEntity<List<LabelDTO>> index() {
-        return ResponseEntity.ok(labelService.findAll());
+        var labels = labelService.findAll();
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(labels.size()))
+                .body(labels);
     }
 
     @GetMapping("/{id}")

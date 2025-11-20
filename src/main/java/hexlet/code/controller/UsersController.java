@@ -31,9 +31,11 @@ public class UsersController {
     private CustomUserDetailsService userService;
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream().map(userMapper::map).toList();
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        var users = userRepository.findAll().stream().map(userMapper::map).toList();
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(users.size()))
+                .body(users);
     }
 
     @PostMapping
