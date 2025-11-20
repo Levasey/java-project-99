@@ -64,6 +64,10 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
 }
 
+tasks.named('test') {
+    finalizedBy jacocoTestReport
+}
+
 tasks.jacocoTestReport {
     reports {
         xml.required.set(true)
