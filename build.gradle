@@ -23,13 +23,6 @@ configurations {
     }
 }
 
-sentry {
-    includeSourceContext = true
-    org = "chest-1n"
-    projectName = "java-spring-boot"
-    authToken = System.getenv("SENTRY_AUTH_TOKEN")
-}
-
 repositories {
     mavenCentral()
     maven { url = 'https://repo.spring.io/snapshot' }
@@ -81,28 +74,5 @@ sonarqube {
         property "sonar.projectKey", "Levasey_java-project-99"
         property "sonar.organization", "levasey"
         property "sonar.host.url", "https://sonarcloud.io"
-
-        // Java configuration
-        property "sonar.sourceEncoding", "UTF-8"
-        property "sonar.java.source", "21"
-        property "sonar.java.binaries", "build/classes/java/main"
-        property "sonar.java.test.binaries", "build/classes/java/test"
-        property "sonar.java.libraries", "build/libs/*.jar"
-
-        // Coverage configuration
-        property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
-        property "sonar.coverage.exclusions", "**/model/**,**/config/**,**/entity/**,**/dto/**,**/Application.java"
-
-        // Test configuration
-        property "sonar.junit.reportPaths", "build/test-results/test"
-        property "sonar.tests", "src/test/java"
-        property "sonar.test.exclusions", "**/model/**,**/config/**,**/entity/**,**/dto/**"
-
-        // Source configuration
-        property "sonar.sources", "src/main/java"
-        property "sonar.tests", "src/test/java"
-
-        // Quality Gate
-        property "sonar.qualitygate.wait", "false"
     }
 }
