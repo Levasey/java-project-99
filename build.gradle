@@ -72,6 +72,17 @@ tasks.jacocoTestReport {
     }
 }
 
+tasks.jacocoTestCoverageVerification {
+    dependsOn jacocoTestReport
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.6".toBigDecimal()
+            }
+        }
+    }
+}
+
 sonarqube {
     properties {
         property "sonar.projectKey", "Levasey_java-project-99"
