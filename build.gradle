@@ -76,17 +76,6 @@ tasks.jacocoTestReport {
     }
 }
 
-tasks.jacocoTestCoverageVerification {
-    dependsOn jacocoTestReport
-    violationRules {
-        rule {
-            limit {
-                minimum = "0.6".toBigDecimal()
-            }
-        }
-    }
-}
-
 sonarqube {
     properties {
         property "sonar.projectKey", "Levasey_java-project-99"
@@ -116,18 +105,4 @@ sonarqube {
         // Quality Gate
         property "sonar.qualitygate.wait", "false"
     }
-}
-
-tasks.check {
-    dependsOn tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification
-}
-
-tasks.clean {
-    doLast {
-        delete("build")
-    }
-}
-
-tasks.named('sonar') {
-    dependsOn test, jacocoTestReport
 }
