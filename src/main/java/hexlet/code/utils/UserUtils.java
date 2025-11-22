@@ -20,4 +20,9 @@ public class UserUtils {
         var email = authentication.getName();
         return userRepository.findByEmail(email).orElse(null);
     }
+
+    public boolean isCurrentUser(Long id) {
+        var user = getCurrentUser();
+        return user != null && user.getId().equals(id);
+    }
 }

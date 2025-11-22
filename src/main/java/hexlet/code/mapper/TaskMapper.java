@@ -62,25 +62,16 @@ public abstract class TaskMapper {
 
     @Named("reverseLabels")
     public List<Long> reverseLabels(List<Label> labelList) {
-        if (labelList != null) {
-            List<Long> labels = new ArrayList<>();
-            for (var label : labelList) {
-                labels.add(label.getId());
-            }
-            return labels;
-        }
-        return null;
+        if (labelList == null) return new ArrayList<>();
+        return labelList.stream()
+                .map(Label::getId)
+                .toList();
     }
 
 
     @Named("forLabels")
     public List<Label> forLabels(List<Long> labelsIds) {
-        List<Label> labels = new ArrayList<>();
-        for (var i : labelsIds) {
-            var label = labelRepository.findById(i).orElseThrow();
-            labels.add(label);
-        }
-        return labels;
+        return labelRepository.findAllById(labelsIds);
     }
 
     @Named("mapAssignee")

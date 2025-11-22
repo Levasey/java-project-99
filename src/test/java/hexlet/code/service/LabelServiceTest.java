@@ -8,6 +8,7 @@ import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.LabelMapper;
 import hexlet.code.model.Label;
 import hexlet.code.repository.LabelRepository;
+import hexlet.code.service.impl.LabelServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +40,7 @@ public class LabelServiceTest {
     private LabelMapper labelMapper;
 
     @InjectMocks
-    private LabelService labelService;
+    private LabelServiceImpl labelService;
 
     private Label testLabel;
     private LabelDTO testLabelDTO;
