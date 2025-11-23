@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.dto.taskStatus.TaskStatusDTO;
+import hexlet.code.mapper.TaskStatusMapper;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.util.ModelGenerator;
@@ -52,6 +53,9 @@ public class TaskStatusControllerTest {
     private TaskStatusRepository taskStatusRepository;
 
     @Autowired
+    private TaskStatusMapper taskStatusMapper;
+
+    @Autowired
     private ModelGenerator modelGenerator;
 
     private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor token;
@@ -84,9 +88,10 @@ public class TaskStatusControllerTest {
 
         List<TaskStatusDTO> taskStatusDTOS = objectMapper.readValue(body, new TypeReference<>() {});
 
-        assertThat(taskStatusDTOS).hasSize(1);
-        assertThatJson(body).isNotNull();
-        assertThatJson(body).isArray();
+        var expected = taskStatusRepository.findAll();
+        var actual = taskStatusDTOS.stream().map(taskStatusMapper::map).toList();
+
+        assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
     }
 
     @Test

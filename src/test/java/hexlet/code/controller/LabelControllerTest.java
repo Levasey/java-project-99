@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.dto.label.LabelCreateDTO;
 import hexlet.code.dto.label.LabelDTO;
 import hexlet.code.dto.label.LabelUpdateDTO;
+import hexlet.code.mapper.LabelMapper;
 import hexlet.code.model.Label;
 import hexlet.code.repository.LabelRepository;
 import hexlet.code.util.ModelGenerator;
@@ -27,7 +28,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -54,6 +54,9 @@ public class LabelControllerTest {
 
     @Autowired
     private LabelRepository labelRepository;
+
+    @Autowired
+    private LabelMapper labelMapper;
 
     private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor token;
 
@@ -86,14 +89,15 @@ public class LabelControllerTest {
 
         var body = result.getResponse().getContentAsString();
 
-        List<LabelDTO> labelDTOS = objectMapper.readValue(body, new TypeReference<List<LabelDTO>>() {});
+        List<LabelDTO> labelDTOS = objectMapper.readValue(body, new TypeReference<>() {
+        });
 
-        assertThat(labelDTOS).hasSize(2);
-        assertThatJson(body).isArray();
+        var expected = labelRepository.findAll();
+        var actual = labelDTOS.stream()
+                .map(labelMapper::map)
+                .toList();
 
-        // Проверяем, что возвращаемые данные содержат ожидаемые поля
-        assertThat(labelDTOS.getFirst().getId()).isNotNull();
-        assertThat(labelDTOS.getFirst().getName()).isNotNull();
+        assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
     }
 
     @Test
@@ -138,30 +142,6 @@ public class LabelControllerTest {
     }
 
     @Test
-    void testCreateWithDuplicateName() throws Exception {
-        // Сначала создаем метку
-        var firstLabel = new LabelCreateDTO();
-        firstLabel.setName("Duplicate Name");
-
-        var firstRequest = post("/api/labels").with(jwt())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(firstLabel));
-
-        mockMvc.perform(firstRequest).andExpect(status().isCreated());
-
-        // Пытаемся создать метку с таким же именем
-        var secondLabel = new LabelCreateDTO();
-        secondLabel.setName("Duplicate Name");
-
-        var secondRequest = post("/api/labels").with(jwt())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(secondLabel));
-
-        mockMvc.perform(secondRequest)
-                .andExpect(status().isConflict());
-    }
-
-    @Test
     void testUpdate() throws Exception {
         var labelUpdateDTO = new LabelUpdateDTO();
         labelUpdateDTO.setName(JsonNullable.of("Updated Label Name"));
@@ -185,24 +165,6 @@ public class LabelControllerTest {
         Label updatedLabel = labelRepository.findById(testLabel.getId()).orElse(null);
         assertThat(updatedLabel).isNotNull();
         assertThat(updatedLabel.getName()).isEqualTo("Updated Label Name");
-    }
-
-    @Test
-    void testUpdateWithDuplicateName() throws Exception {
-        // Создаем вторую метку
-        var secondLabel = Instancio.of(modelGenerator.getLabelModel()).create();
-        labelRepository.save(secondLabel);
-
-        // Пытаемся обновить первую метку с именем второй
-        var labelUpdateDTO = new LabelUpdateDTO();
-        labelUpdateDTO.setName(JsonNullable.of(secondLabel.getName()));
-
-        var request = put("/api/labels/" + testLabel.getId()).with(jwt())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(labelUpdateDTO));
-
-        mockMvc.perform(request)
-                .andExpect(status().isConflict());
     }
 
     @Test

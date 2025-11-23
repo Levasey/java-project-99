@@ -3,7 +3,9 @@ package hexlet.code.service.impl;
 import hexlet.code.dto.user.UserCreateDTO;
 import hexlet.code.dto.user.UserDTO;
 import hexlet.code.dto.user.UserUpdateDTO;
+import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.UserMapper;
+import hexlet.code.model.User;
 import hexlet.code.repository.UserRepository;
 import hexlet.code.service.UserService;
 import lombok.AllArgsConstructor;
@@ -28,22 +30,32 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserDTO findById(Long id) {
-
-        return null;
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        return userMapper.map(user);
     }
 
     @Override
     public UserDTO create(UserCreateDTO userCreateDTO) {
-        return null;
+        User user = userMapper.map(userCreateDTO);
+        User savedUser = userRepository.save(user);
+        return userMapper.map(savedUser);
     }
 
     @Override
     public UserDTO update(Long id, UserUpdateDTO userUpdateDTO) {
-        return null;
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        userMapper.update(userUpdateDTO, user);
+        User updatedUser = userRepository.save(user);
+        return userMapper.map(updatedUser);
     }
 
     @Override
     public void deleteById(Long id) {
-
+        if (!userRepository.existsById(id)) {
+            throw new ResourceNotFoundException("User not found with id: " + id);
+        }
+        userRepository.deleteById(id);
     }
 }
