@@ -37,7 +37,7 @@ public class Task implements BaseEntity {
     @ToString.Include
     private String description;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "task_labels",
             joinColumns = @JoinColumn(name = "task_id"),
