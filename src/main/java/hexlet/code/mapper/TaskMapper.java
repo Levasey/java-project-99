@@ -76,7 +76,7 @@ public abstract class TaskMapper {
 
     @Named("mapAssignee")
     public User mapAssignee(JsonNullable<Long> assigneeId) {
-        if (!assigneeId.isPresent() || assigneeId == null) {
+        if (!assigneeId.isPresent()) {
             return null;
         }
         if (assigneeId.get() == null) {

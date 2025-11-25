@@ -6,6 +6,8 @@ logging:
         security: DEBUG
 
 spring:
+  application:
+    name: app
   jpa:
     generate-ddl: true
     show-sql: true

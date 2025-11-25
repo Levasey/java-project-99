@@ -137,7 +137,7 @@ public class TaskControllerTest {
 
         assertThat(taskDTO.getId()).isEqualTo(testTask.getId());
         assertThat(taskDTO.getTitle()).isEqualTo(testTask.getName());
-        assertThat(taskDTO.getContent().get()).isEqualTo(testTask.getDescription());
+        assertThat(taskDTO.getContent()).isEqualTo(testTask.getDescription());
         assertThat(taskDTO.getTaskStatusId()).isEqualTo(testTaskStatus.getId());
         assertThat(taskDTO.getAssigneeId()).isEqualTo(testUser.getId());
     }
@@ -170,8 +170,8 @@ public class TaskControllerTest {
         TaskDTO createdTaskDTO = objectMapper.readValue(body, TaskDTO.class);
 
         assertThat(createdTaskDTO.getTitle()).isEqualTo("New Task title");
-        assertThat(createdTaskDTO.getContent().get()).isEqualTo("Test content for new task");
-        assertThat(createdTaskDTO.getIndex().get()).isEqualTo(5);
+        assertThat(createdTaskDTO.getContent()).isEqualTo("Test content for new task");
+        assertThat(createdTaskDTO.getIndex()).isEqualTo(5);
         assertThat(createdTaskDTO.getTaskStatusId()).isEqualTo(testTaskStatus.getId());
         assertThat(createdTaskDTO.getAssigneeId()).isEqualTo(testUser.getId());
 
@@ -233,8 +233,8 @@ public class TaskControllerTest {
 
         assertThat(updatedTaskDTO.getTitle()).isEqualTo("Partially Updated title");
         // Остальные поля должны остаться без изменений
-        assertThat(updatedTaskDTO.getContent().get()).isEqualTo(testTask.getDescription());
-        assertThat(updatedTaskDTO.getIndex().get()).isEqualTo(testTask.getIndex());
+        assertThat(updatedTaskDTO.getContent()).isEqualTo(testTask.getDescription());
+        assertThat(updatedTaskDTO.getIndex()).isEqualTo(testTask.getIndex());
     }
 
     @Test

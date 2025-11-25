@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.openapitools.jackson.nullable.JsonNullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +17,7 @@ public class TaskCreateDTO {
     private String title;
 
     private int index;
-    private JsonNullable<String> content;
+    private String content;
 
     @NotNull(message = "Task status is required")
     private Long taskStatusId;
