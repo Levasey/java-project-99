@@ -48,9 +48,11 @@ public class Task implements BaseEntity {
     @NotNull(message = "Task status cannot be blank")
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "task_status_id")
+    @ToString.Include
     private TaskStatus taskStatus;
 
     @ManyToOne
+    @ToString.Include
     @JoinColumn(name = "assignee_id")
     private User assignee;
 

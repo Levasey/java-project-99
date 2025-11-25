@@ -8,6 +8,11 @@
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Levasey_java-project-99&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Levasey_java-project-99)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=Levasey_java-project-99&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=Levasey_java-project-99)
 
+## Description
+Task Manager is a task management system similar to http://www.redmine.org/. 
+It allows you to create tasks, assign executors, and change their statuses. 
+Registration and authentication are required to work with the system.
+
 ## Requirements
 
 * Java 21
