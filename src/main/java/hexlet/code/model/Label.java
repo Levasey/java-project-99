@@ -1,6 +1,5 @@
 package hexlet.code.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -12,8 +11,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Setter
 @Getter
@@ -32,10 +29,6 @@ public class Label implements BaseEntity {
     @Column(unique = true)
     @Size(min = 3, max = 1000, message = "Name must be between 3 and 1000 characters long")
     private String name;
-
-    @ManyToMany(mappedBy = "labels")
-    @JsonIgnore
-    List<Task> tasks = new ArrayList<>();
 
     @CreatedDate
     private LocalDate createdAt;

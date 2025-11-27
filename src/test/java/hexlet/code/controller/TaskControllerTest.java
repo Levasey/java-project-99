@@ -154,7 +154,7 @@ public class TaskControllerTest {
         var data = new HashMap<String, Object>();
         data.put("title", "New Task title");
         data.put("content", "Test content for new task");
-        data.put("taskStatusId", testTaskStatus.getId());
+        data.put("status", testTaskStatus.getSlug());
         data.put("assigneeId", testUser.getId());
         data.put("index", 5);
 

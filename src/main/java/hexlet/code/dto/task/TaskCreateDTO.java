@@ -20,7 +20,7 @@ public class TaskCreateDTO {
     private String content;
 
     @NotNull(message = "Task status is required")
-    private Long taskStatusId;
+    private String status;
 
     private Long assigneeId;
 

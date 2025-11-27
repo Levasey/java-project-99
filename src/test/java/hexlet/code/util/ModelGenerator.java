@@ -61,7 +61,6 @@ public class ModelGenerator {
 
         labelModel = Instancio.of(Label.class)
                 .ignore(Select.field(Label::getId))
-                .ignore(Select.field(Label::getTasks))
                 .supply(Select.field(Label::getName), () -> {
                     String name = faker.lorem().word();
                     // Если слово слишком короткое, добавляем к нему

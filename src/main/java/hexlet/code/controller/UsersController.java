@@ -61,10 +61,6 @@ public class UsersController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody UserRegistrationDTO registrationDTO) {
-        if (customUserDetailsService.userExists(registrationDTO.getEmail())) {
-            return ResponseEntity.badRequest().body("User already exists");
-        }
-
         User user = new User();
         user.setFirstName(registrationDTO.getFirstName());
         user.setLastName(registrationDTO.getLastName());
