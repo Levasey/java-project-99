@@ -138,7 +138,7 @@ public class TaskControllerTest {
         assertThat(taskDTO.getId()).isEqualTo(testTask.getId());
         assertThat(taskDTO.getTitle()).isEqualTo(testTask.getName());
         assertThat(taskDTO.getContent()).isEqualTo(testTask.getDescription());
-        assertThat(taskDTO.getTaskStatusId()).isEqualTo(testTaskStatus.getId());
+        assertThat(taskDTO.getStatus()).isEqualTo(testTaskStatus.getSlug());
         assertThat(taskDTO.getAssigneeId()).isEqualTo(testUser.getId());
     }
 
@@ -172,7 +172,7 @@ public class TaskControllerTest {
         assertThat(createdTaskDTO.getTitle()).isEqualTo("New Task title");
         assertThat(createdTaskDTO.getContent()).isEqualTo("Test content for new task");
         assertThat(createdTaskDTO.getIndex()).isEqualTo(5);
-        assertThat(createdTaskDTO.getTaskStatusId()).isEqualTo(testTaskStatus.getId());
+        assertThat(createdTaskDTO.getStatus()).isEqualTo(testTaskStatus.getSlug());
         assertThat(createdTaskDTO.getAssigneeId()).isEqualTo(testUser.getId());
 
         // Проверяем, что задача действительно сохранена в БД

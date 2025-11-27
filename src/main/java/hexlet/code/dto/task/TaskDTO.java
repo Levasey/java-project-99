@@ -16,7 +16,7 @@ public class TaskDTO {
     private String title;
     private int index;
     private String content;
-    private Long taskStatusId;
+    private String status;
 
     @JsonProperty("assignee_id")
     private Long assigneeId;
