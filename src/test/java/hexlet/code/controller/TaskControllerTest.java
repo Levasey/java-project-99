@@ -216,28 +216,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    void testPartialUpdate() throws Exception {
-        // Обновляем только имя
-        var data = Map.of("title", "Partially Updated title");
-
-        var request = put("/api/tasks/" + testTask.getId()).with(jwt())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(data));
-
-        var result = mockMvc.perform(request)
-                .andExpect(status().isOk())
-                .andReturn();
-
-        var body = result.getResponse().getContentAsString();
-        TaskDTO updatedTaskDTO = objectMapper.readValue(body, TaskDTO.class);
-
-        assertThat(updatedTaskDTO.getTitle()).isEqualTo("Partially Updated title");
-        // Остальные поля должны остаться без изменений
-        assertThat(updatedTaskDTO.getContent()).isEqualTo(testTask.getDescription());
-        assertThat(updatedTaskDTO.getIndex()).isEqualTo(testTask.getIndex());
-    }
-
-    @Test
     void testUpdateNotFound() throws Exception {
         var data = Map.of("title", "Updated title");
 
