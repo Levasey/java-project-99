@@ -61,7 +61,6 @@ public class LabelControllerTest {
     private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor token;
 
     private Label testLabel;
-    private Label anotherLabel;
 
     @BeforeEach
     void setUp() {
@@ -74,11 +73,9 @@ public class LabelControllerTest {
         objectMapper.registerModule(new JsonNullableModule());
 
         testLabel = Instancio.of(modelGenerator.getLabelModel()).create();
-        anotherLabel = Instancio.of(modelGenerator.getLabelModel()).create();
         token = jwt().jwt(builder -> builder.subject("hexlet@example.com"));
 
         labelRepository.save(testLabel);
-        labelRepository.save(anotherLabel);
     }
 
     @Test
