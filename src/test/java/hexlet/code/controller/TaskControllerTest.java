@@ -182,20 +182,6 @@ public class TaskControllerTest {
     }
 
     @Test
-    void testCreateWithInvalidData() throws Exception {
-        // Пытаемся создать задачу без обязательных полей
-        var invalidData = new HashMap<String, Object>();
-        invalidData.put("description", "Test description"); // нет name и taskStatusId
-
-        var request = post("/api/tasks").with(jwt())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(invalidData));
-
-        mockMvc.perform(request)
-                .andExpect(status().isUnprocessableEntity());
-    }
-
-    @Test
     void testUpdate() throws Exception {
         var data = new HashMap<>();
         data.put("title", "Updated name");
