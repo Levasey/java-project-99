@@ -3,6 +3,7 @@ package hexlet.code.service.impl;
 import hexlet.code.dto.taskStatus.TaskStatusCreateDTO;
 import hexlet.code.dto.taskStatus.TaskStatusDTO;
 import hexlet.code.dto.taskStatus.TaskStatusUpdateDTO;
+import hexlet.code.exception.ReferencedEntityException;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.TaskStatusMapper;
 import hexlet.code.model.TaskStatus;
@@ -52,9 +53,16 @@ public class TaskStatusServiceImpl implements TaskStatusService {
     }
 
     public void delete(Long id) {
-        if (!taskStatusRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Task status not found with id: " + id);
+        TaskStatus taskStatus = taskStatusRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Task status not found with id: " + id));
+
+        // Проверяем, есть ли связанные задачи
+        if (!taskStatus.getTasks().isEmpty()) {
+            throw new ReferencedEntityException(
+                    "Cannot delete task status because it is referenced by one or more tasks"
+            );
         }
-        taskStatusRepository.deleteById(id);
+
+        taskStatusRepository.delete(taskStatus);
     }
 }

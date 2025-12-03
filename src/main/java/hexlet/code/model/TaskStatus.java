@@ -28,8 +28,9 @@ public class TaskStatus implements BaseEntity{
     private Long id;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "taskStatus", cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
-            orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "taskStatus",
+            cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
+            fetch = FetchType.LAZY)
     private List<Task> tasks = new ArrayList<>();
 
     @NotBlank

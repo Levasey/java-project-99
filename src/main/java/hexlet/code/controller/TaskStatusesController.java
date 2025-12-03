@@ -3,6 +3,7 @@ package hexlet.code.controller;
 import hexlet.code.dto.taskStatus.TaskStatusCreateDTO;
 import hexlet.code.dto.taskStatus.TaskStatusDTO;
 import hexlet.code.dto.taskStatus.TaskStatusUpdateDTO;
+import hexlet.code.exception.UnprocessableContentException;
 import hexlet.code.service.TaskStatusService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
