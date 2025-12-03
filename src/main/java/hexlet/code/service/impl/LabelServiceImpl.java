@@ -19,11 +19,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional
 public class LabelServiceImpl implements LabelService {
-    @Autowired
-    private LabelRepository labelRepository;
-
-    @Autowired
-    private LabelMapper labelMapper;
+    private final LabelRepository labelRepository;
+    private final LabelMapper labelMapper;
 
     @Transactional(readOnly = true)
     public List<LabelDTO> findAll() {

@@ -22,11 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional
 public class TaskServiceImpl implements TaskService {
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
-    private TaskMapper taskMapper;
+    private final TaskRepository taskRepository;
+    private final TaskMapper taskMapper;
 
     @Autowired
     private TaskSpecification taskSpecification;

@@ -19,11 +19,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional
 public class TaskStatusServiceImpl implements TaskStatusService {
-    @Autowired
-    private TaskStatusRepository taskStatusRepository;
-
-    @Autowired
-    private TaskStatusMapper taskStatusMapper;
+    private final TaskStatusRepository taskStatusRepository;
+    private final TaskStatusMapper taskStatusMapper;
 
     @Transactional(readOnly = true)
     public List<TaskStatusDTO> findAll() {
