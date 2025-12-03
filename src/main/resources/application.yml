@@ -20,6 +20,8 @@ spring:
     ansi:
       enabled: always
 
+security.enable-csrf: false
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
