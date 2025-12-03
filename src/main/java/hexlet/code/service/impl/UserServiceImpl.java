@@ -2,6 +2,7 @@ package hexlet.code.service.impl;
 
 import hexlet.code.dto.user.UserCreateDTO;
 import hexlet.code.dto.user.UserDTO;
+import hexlet.code.dto.user.UserRegistrationDTO;
 import hexlet.code.dto.user.UserUpdateDTO;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.UserMapper;
@@ -57,5 +58,15 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("User not found with id: " + id);
         }
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public User register(UserRegistrationDTO registrationDTO) {
+        User user = new User();
+        user.setFirstName(registrationDTO.getFirstName());
+        user.setLastName(registrationDTO.getLastName());
+        user.setEmail(registrationDTO.getEmail());
+        user.setPasswordDigest(registrationDTO.getPassword());
+        return user;
     }
 }

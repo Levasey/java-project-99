@@ -20,9 +20,7 @@ import java.util.List;
 @RequestMapping("/api/users")
 @AllArgsConstructor
 public class UsersController {
-
     private final UserService userService;
-
     private final CustomUserDetailsService customUserDetailsService;
 
     @GetMapping
@@ -61,12 +59,7 @@ public class UsersController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody UserRegistrationDTO registrationDTO) {
-        User user = new User();
-        user.setFirstName(registrationDTO.getFirstName());
-        user.setLastName(registrationDTO.getLastName());
-        user.setEmail(registrationDTO.getEmail());
-        user.setPasswordDigest(registrationDTO.getPassword());
-
+        User user = userService.register(registrationDTO);
         customUserDetailsService.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
     }
